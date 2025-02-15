@@ -1,0 +1,9 @@
+{
+  "watch": [
+    "src",
+    "../common/src"
+  ],
+  "ext": "ts",
+  "delay": 500,
+  "exec": "npm run start"
+}

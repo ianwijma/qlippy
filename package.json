@@ -1,0 +1,27 @@
+{
+  "name": "qlippy-monorepo",
+  "description": "Qlip That!",
+  "author": {
+    "name": "Ian Wijma",
+    "url": "https://ian.wij.ma/",
+    "email": ""
+  },
+  "license": "",
+  "workspaces": [
+    "packages/common",
+    "packages/frontend",
+    "packages/backend"
+  ],
+  "scripts": {
+    "dev": "node bin/dev.mjs",
+    "build": "node bin/build.mjs",
+    "build-quick": "node bin/build.mjs --quick",
+    "reset": "node bin/reset.mjs",
+    "postinstall": "patch-package"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0",
+    "patch-package": "^8.0.0",
+    "zx": "^8.2.4"
+  }
+}
