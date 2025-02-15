@@ -28,14 +28,14 @@ const createSaveLoadFn = (name: 'compress' | 'decompress'): (data: ClipboardHist
         console.time(name);
         const compressedClipboardHistory = await Promise.all(clipboardHistory.map(async (item) => {
             const {type} = item;
-            if (type === 'text' && item.value.length > 1000) {
+            if (type === 'text' && item.metadata.length > 1000) {
                 return {
                     ...item,
                     value: await compressDecompressFn(item.value),
                 }
             }
 
-            if (type === 'html' && item.value.length > 1000) {
+            if (type === 'html' && item.metadata.length > 1000) {
                 return {
                     ...item,
                     value: await compressDecompressFn(item.value),
