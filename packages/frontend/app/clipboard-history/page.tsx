@@ -79,7 +79,8 @@ export default function ClipboardHistoryPage() {
             const {hash, type} = item;
             switch (type) {
                 case "path":
-                case "url": {
+                case "url":
+                case 'html': {
                     const {metadata: {text}} = item;
                     return {
                         hash,
@@ -88,8 +89,7 @@ export default function ClipboardHistoryPage() {
                         searchableText: text.toLowerCase(),
                     }
                 }
-                case 'text':
-                case 'html': {
+                case 'text':{
                     const {value} = item;
                     return {
                         hash,
@@ -99,7 +99,7 @@ export default function ClipboardHistoryPage() {
                     }
                 }
                 case 'image': {
-                    const {hash, value} = item;
+                    const {value} = item;
                     return {
                         hash,
                         type,
