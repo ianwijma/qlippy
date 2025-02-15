@@ -4,7 +4,7 @@ import {useSettings} from "../../hooks/useSettings";
 import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {useWindowControls} from "../../hooks/useWindowControls";
 import {
-    ClipboardHistoryItemHashId,
+    ClipboardHistoryItemHash,
     ClipboardHistoryItemTypes,
     ClipboardHistorySettings
 } from "@qlippy/common/src/settings/clipboard-history.settings.types";
@@ -19,14 +19,14 @@ import {
 } from '@qlippy/common/src/events/clearClipboardHistory.event'
 
 type SearchableClipboardHistoryItems = {
-    id: ClipboardHistoryItemHashId;
+    hash: ClipboardHistoryItemHash;
     type: ClipboardHistoryItemTypes;
     title: string;
     searchableText: string;
 }
 
 type Result = {
-    id: ClipboardHistoryItemHashId;
+    hash: ClipboardHistoryItemHash;
     type: ClipboardHistoryItemTypes;
     title: string;
 }
@@ -49,22 +49,22 @@ export default function ClipboardHistoryPage() {
         return undefined;
     }
 
-    const restoreClipboardItem = useCallback((id: ClipboardHistoryItemHashId) => {
-        eventHandler.emit<RestoreClipboardHistoryEventData>(restoreClipboardHistoryEventName, {clipboardHistoryItemHashId: id});
+    const restoreClipboardItem = useCallback((hash: ClipboardHistoryItemHash) => {
+        eventHandler.emit<RestoreClipboardHistoryEventData>(restoreClipboardHistoryEventName, {hash});
 
         close();
     }, [settings]);
 
-    const removeClipboardItem = useCallback((id: ClipboardHistoryItemHashId) => {
+    const removeClipboardItem = useCallback((hash: ClipboardHistoryItemHash) => {
         // TODO: currently it can take a bit before items are being removed, so we might need to come up with a way to remove an item before the change is saved.
-        eventHandler.emit<ClearClipboardHistoryEventData>(clearClipboardHistoryEventName, {ids: [id]});
+        eventHandler.emit<ClearClipboardHistoryEventData>(clearClipboardHistoryEventName, {hashes: [hash]});
     }, [settings]);
 
     const removeAllClipboardItems = useCallback(async () => {
         const {clipboardHistory} = settings;
 
         eventHandler.emit<ClearClipboardHistoryEventData>(clearClipboardHistoryEventName, {
-            ids: clipboardHistory.map(({id}) => id),
+            hashes: clipboardHistory.map(({hash}) => hash),
         });
 
         close();
@@ -76,24 +76,34 @@ export default function ClipboardHistoryPage() {
         const {clipboardHistory} = settings;
 
         return clipboardHistory.map((item) => {
-            const {id, type} = item;
+            const {hash, type} = item;
             switch (type) {
-                case 'text':
-                case 'html': {
-                    const {text} = item;
+                case "path":
+                case "url": {
+                    const {metadata: {text}} = item;
                     return {
-                        id,
+                        hash,
                         type,
                         title: text,
                         searchableText: text.toLowerCase(),
                     }
                 }
-                case 'image': {
-                    const {image} = item;
+                case 'text':
+                case 'html': {
+                    const {value} = item;
                     return {
-                        id,
+                        hash,
                         type,
-                        title: image,
+                        title: value,
+                        searchableText: value.toLowerCase(),
+                    }
+                }
+                case 'image': {
+                    const {hash, value} = item;
+                    return {
+                        hash,
+                        type,
+                        title: value,
                         searchableText: 'image'
                     }
                 }
@@ -102,7 +112,7 @@ export default function ClipboardHistoryPage() {
     }, [settings]);
 
     const results = useMemo<Result[]>(() => {
-        const toResult = ({id, type, title}) => ({id, type, title});
+        const toResult = ({hash, type, title}) => ({hash, type, title});
 
         const isSearching = query.trim() !== '';
         if (isSearching) {
@@ -127,7 +137,7 @@ export default function ClipboardHistoryPage() {
     const confirmSelected = useCallback(() => {
         const item = getSelectedItem();
         if (item) {
-            restoreClipboardItem(item.id)
+            restoreClipboardItem(item.hash)
         }
     }, [results, selected, restoreClipboardItem]);
 
@@ -155,7 +165,7 @@ export default function ClipboardHistoryPage() {
                 case 'Delete':
                     const item = getSelectedItem();
                     if (item) {
-                        removeClipboardItem(item.id)
+                        removeClipboardItem(item.hash)
                     }
                     break;
             }
@@ -183,7 +193,7 @@ export default function ClipboardHistoryPage() {
         </div>
         <div className="w-11/12 p-3 bg-slate-700 rounded-b-3xl max-h-[800px] overflow-x-hidden">
             <ul className="flex flex-col gap-1">
-                {results.map(({title, id, type}: Result, index) => {
+                {results.map(({title, hash, type}: Result, index) => {
                     let roundTop = true;
                     let roundBottom = true;
                     if (resultAmount > 1) {
@@ -199,12 +209,12 @@ export default function ClipboardHistoryPage() {
                     const isSelected = index === selected;
 
                     return (
-                        <li key={id} ref={isSelected ? selectedRef : null}>
+                        <li key={hash} ref={isSelected ? selectedRef : null}>
                             <div
                                 className={`w-full h-10 text-black flex text-xl hover:bg-slate-400 overflow-hidden ${roundTop ? 'rounded-t-2xl' : ''} ${roundBottom ? 'rounded-b-2xl' : ''} ${isSelected ? 'bg-slate-300' : 'bg-white'}`}>
                                 <button
                                     className='w-full h-10 flex items-center px-2 truncate'
-                                    onClick={() => restoreClipboardItem(id)}
+                                    onClick={() => restoreClipboardItem(hash)}
                                 >
                                     {
                                         type === 'image'
@@ -218,7 +228,7 @@ export default function ClipboardHistoryPage() {
                                 </button>
                                 <button
                                     className='h-10 w-10 hover:bg-slate-500'
-                                    onClick={() => removeClipboardItem(id)}
+                                    onClick={() => removeClipboardItem(hash)}
                                 >
                                     X
                                 </button>

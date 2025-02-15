@@ -1,0 +1,200 @@
+import {clipboard} from "electron";
+import fs from 'node:fs/promises'
+import type {Stats} from 'node:fs'
+import {createHash} from "node:crypto";
+import EventEmitter from "node:events";
+import {ClipboardData, ClipboardHash, ClipboardType} from "@qlippy/common/src/clipboard.types";
+
+const CLIPBOARD_CHECK_INTERVAL_MS = 250;
+
+const getPathStats = async (path: string): Promise<Stats | false> => {
+    return fs.stat(path).catch(() => false);
+}
+
+const getUrl = (url: string): URL | false => {
+    try {
+        return new URL(url);
+    } catch (e) {
+        return false;
+    }
+}
+
+const sha1 = (input: string): string => {
+    const hash = createHash('SHA1');
+    hash.write(input);
+    return hash.digest('hex');
+}
+
+// Singleton instance that listens to clipboard changes.
+export const clipboardChangeListener = (() => {
+    const eventEmitter = new EventEmitter();
+    const emit = (data: ClipboardData) => eventEmitter.emit<ClipboardData>('change', data)
+
+    let startIntervalId: NodeJS.Timeout | undefined;
+
+    const clipboardHashMap = new Map<ClipboardType, ClipboardHash>();
+    const updateHash = (name: ClipboardType, hash: ClipboardHash): void => {
+        clipboardHashMap.set(name, hash);
+    };
+    const isHashDifferent = (name: ClipboardType, hash: ClipboardHash): boolean => {
+        return clipboardHashMap.get(name) !== hash;
+    }
+
+    return {
+        initialize: async () => {
+            if (!startIntervalId) {
+                startIntervalId = setInterval(async () => {
+                    // First we're getting the image, because HTML can contain the HTML version of an image.
+                    const image = clipboard.readImage('clipboard');
+                    if (!image.isEmpty()) {
+                        image.getScaleFactors()
+                        const imageValue = image.toDataURL();
+                        const imageHash = sha1(imageValue)
+                        if (isHashDifferent('image', imageHash)) {
+                            updateHash('image', imageHash);
+
+                            emit({
+                                type: 'image',
+                                value: imageValue,
+                                hash: imageHash,
+                                metadata: {
+                                    aspectRadio: image.getAspectRatio(),
+                                    size: image.getSize(),
+                                }
+                            })
+                        }
+
+                        return; // Is handle
+                    }
+
+                    // Secondly we're getting the HTML, as HTML also contains the text in the HTML.
+                    const html = clipboard.readHTML('clipboard');
+                    if (html.trim() !== '') {
+                        const htmlHash = sha1(html);
+                        if (isHashDifferent('html', htmlHash)) {
+                            updateHash('html', htmlHash);
+
+                            // Getting the text extracted from the HTML;
+                            const htmlText = clipboard.readText('clipboard');
+
+                            emit({
+                                type: 'html',
+                                value: html,
+                                hash: htmlHash,
+                                metadata: {
+                                    length: html.length,
+                                    text: htmlText,
+                                    textLength: htmlText.length
+                                }
+                            })
+                        }
+
+                        return; // Is handle
+                    }
+
+                    // Lastly we're getting the text, where after we're doing a bunch of checks against.
+                    const text = clipboard.readText('clipboard');
+
+                    // First text check we're checking if it contains a local path.
+                    const path = text.trim();
+                    const pathStats = path !== '' && await getPathStats(path);
+                    if (pathStats) {
+                        pathStats.atime
+                        const pathHash = sha1(path); // TODO: maybe change this to a sha1 from a file?
+                        if (isHashDifferent('path', pathHash)) {
+                            updateHash('path', pathHash)
+
+                            emit({
+                                type: 'path',
+                                value: path,
+                                hash: pathHash,
+                                metadata: {
+                                    text,
+                                    isBlockDevice: pathStats.isBlockDevice(),
+                                    isCharacterDevice: pathStats.isCharacterDevice(),
+                                    isDirectory: pathStats.isDirectory(),
+                                    isFile: pathStats.isFile(),
+                                    isFIFO: pathStats.isFIFO(),
+                                    isSocket: pathStats.isSocket(),
+                                    isSymbolicLink: pathStats.isSymbolicLink(),
+                                    deviceId: pathStats.rdev, // rdev
+                                    deviceFileId: pathStats.dev, // dev
+                                    inode: pathStats.ino, // ino
+                                    mode: pathStats.mode,
+                                    amountOfHardlinks: pathStats.nlink, //nlink
+                                    userId: pathStats.uid,
+                                    groupId: pathStats.gid,
+                                    size: pathStats.size,
+                                    blockSizeIO: pathStats.blksize, // blksize
+                                    blockSize: pathStats.blocks, // blocks
+                                    lastAccessedMs: pathStats.atimeMs, // atimeMs
+                                    lastModifiedMs: pathStats.mtimeMs, // mtimeMs
+                                    statusChangedMs: pathStats.ctimeMs, // ctimeMs
+                                    createdMs: pathStats.birthtimeMs, // birthtimeMs
+                                }
+                            })
+                        }
+
+                        return; // Is handle
+                    }
+
+                    // Second text check we're checking if it contains a valid URL.
+                    const possibleUrl = text.trim();
+                    const url = possibleUrl !== '' && getUrl(possibleUrl);
+                    if (url) {
+                        const urlString = url.toString();
+                        const urlStringHash = sha1(urlString);
+                        if (isHashDifferent('url', urlStringHash)) {
+                            updateHash('url', urlStringHash);
+
+                            emit({
+                                type: 'url',
+                                value: urlString,
+                                hash: urlStringHash,
+                                metadata: {
+                                    text,
+                                    hash: url.hash,
+                                    host: url.host,
+                                    hostname: url.hostname,
+                                    href: url.href,
+                                    origin: url.origin,
+                                    password: url.password,
+                                    pathname: url.pathname,
+                                    port: url.port,
+                                    protocol: url.protocol,
+                                    search: url.search,
+                                    searchParams: JSON.parse('{"' + decodeURI(url.search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}'),
+                                    username: url.username,
+                                }
+                            })
+                        }
+
+                        return; // Is handle
+                    }
+
+                    // Last text check we're checking if is not empty.
+                    if (text.trim() !== '') {
+                        const textHash = sha1(text);
+                        if (isHashDifferent('text', textHash)) {
+                            updateHash('text', textHash);
+
+                            emit({
+                                type: 'text',
+                                value: text,
+                                hash: textHash,
+                                metadata: {
+                                    length: text.length
+                                }
+                            })
+                        }
+
+                        return; // Is handle
+                    }
+
+                    console.log('[clipboard-change-listener] Unknown clipboard change.')
+                }, CLIPBOARD_CHECK_INTERVAL_MS);
+            }
+        },
+        onChange: (callback: (data: ClipboardData) => void) => eventEmitter.on('change', callback)
+    }
+})()

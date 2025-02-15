@@ -4,7 +4,6 @@ import zlib from "node:zlib";
 import {Buffer} from "node:buffer";
 import {promisify} from 'node:util';
 
-
 const compressPromiseFn = promisify(zlib.deflate);
 const decompressPromiseFn = promisify(zlib.inflate);
 
@@ -29,24 +28,28 @@ const createSaveLoadFn = (name: 'compress' | 'decompress'): (data: ClipboardHist
         console.time(name);
         const compressedClipboardHistory = await Promise.all(clipboardHistory.map(async (item) => {
             const {type} = item;
-            if (type === 'text' && item.text.length > 1000) {
+            if (type === 'text' && item.value.length > 1000) {
                 return {
                     ...item,
-                    text: await compressDecompressFn(item.text),
+                    value: await compressDecompressFn(item.value),
                 }
             }
 
-            if (type === 'html' && item.html.length > 1000) {
+            if (type === 'html' && item.value.length > 1000) {
                 return {
                     ...item,
-                    html: await compressDecompressFn(item.html),
+                    value: await compressDecompressFn(item.value),
+                    metadata: {
+                        ...item.metadata,
+                        text: await compressDecompressFn(item.metadata.text),
+                    }
                 }
             }
 
             if (type === 'image') {
                 return {
                     ...item,
-                    image: await compressDecompressFn(item.image),
+                    value: await compressDecompressFn(item.value),
                 }
             }
 

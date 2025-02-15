@@ -9,9 +9,11 @@ import {aboutWindow} from "./windows/about.window";
 import {keyboardSettings} from "./settings/keyboard.setting";
 import {keyboardShortcuts} from "./utils/keyboard-shortcuts";
 import {clipboardHistorySettings} from "./settings/clipboard-history.setting";
-import {clipboardChanges} from "./utils/clipboard-changes-event";
 import {clipboardHistoryWindow} from "./windows/clipboard-history.window";
-import {clipboardManager} from "./utils/clipboard-manager";
+import {clipboardChangeHandler} from "./clipboard-manager/clipboard-change-handler";
+import {clipboardRestoreHandler} from "./clipboard-manager/clipboard-restore-handler";
+import {clipboardClearHandler} from "./clipboard-manager/clipboard-clear-handler";
+import {clipboardChangeListener} from "./clipboard-manager/clipboard-change-listener";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -33,20 +35,26 @@ if (!isSingleInstance) {
     const onReady = async () => {
         // Settings
         await keyboardSettings.initialize();
-        await clipboardHistorySettings.initialize();
 
         if (startupArguments.reset) {
             await resetAllSettings();
         }
 
-        // Windows
-        await clipboardHistoryWindow.initialize();
-        await aboutWindow.initialize();
+        // Setup Clipboard Processes
+        await clipboardChangeListener.initialize();
+        await clipboardHistorySettings.initialize();
 
         // Background Processes
         await keyboardShortcuts.initialize();
-        await clipboardChanges.startListening();
-        await clipboardManager.initialize();
+
+        // Clipboard Processes
+        await clipboardChangeHandler.initialize();
+        await clipboardRestoreHandler.initialize();
+        await clipboardClearHandler.initialize();
+
+        // Windows
+        await clipboardHistoryWindow.initialize();
+        await aboutWindow.initialize();
 
         // Tray
         await defaultTray.initialize();
