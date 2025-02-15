@@ -11,6 +11,7 @@ import {keyboardShortcuts} from "./utils/keyboard-shortcuts";
 import {clipboardHistorySettings} from "./settings/clipboard-history.setting";
 import {clipboardChanges} from "./utils/clipboard-changes-event";
 import {clipboardHistoryWindow} from "./windows/clipboard-history.window";
+import {clipboardManager} from "./utils/clipboard-manager";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -45,6 +46,7 @@ if (!isSingleInstance) {
         // Background Processes
         await keyboardShortcuts.initialize();
         await clipboardChanges.startListening();
+        await clipboardManager.initialize();
 
         // Tray
         await defaultTray.initialize();
