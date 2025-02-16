@@ -8,7 +8,7 @@ import {resetAllSettings} from "./utils/resetAllSettings";
 import {aboutWindow} from "./windows/about.window";
 import {keyboardSettings} from "./settings/keyboard.setting";
 import {keyboardShortcuts} from "./utils/keyboard-shortcuts";
-import {clipboardHistorySettings} from "./settings/clipboard-history.setting";
+import {clipboardSettings} from "./settings/clipboard.setting";
 import {clipboardHistoryWindow} from "./windows/clipboard-history.window";
 import {clipboardChangeHandler} from "./clipboard-manager/clipboard-change-handler";
 import {clipboardRestoreHandler} from "./clipboard-manager/clipboard-restore-handler";
@@ -42,7 +42,7 @@ if (!isSingleInstance) {
 
         // Setup Clipboard Processes
         await clipboardChangeListener.initialize();
-        await clipboardHistorySettings.initialize();
+        await clipboardSettings.initialize();
 
         // Background Processes
         await keyboardShortcuts.initialize();

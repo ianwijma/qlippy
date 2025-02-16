@@ -1,6 +1,6 @@
 import {confirmDialog} from "../windows/dialog.window";
 import {keyboardSettings} from "../settings/keyboard.setting";
-import {clipboardHistorySettings} from "../settings/clipboard-history.setting";
+import {clipboardSettings} from "../settings/clipboard.setting";
 
 export const resetAllSettings = async () => {
     const {confirmed} = await confirmDialog.open({
@@ -10,6 +10,6 @@ export const resetAllSettings = async () => {
 
     if (confirmed) {
         await keyboardSettings.resetSettings();
-        await clipboardHistorySettings.resetSettings();
+        await clipboardSettings.resetSettings();
     }
 }
