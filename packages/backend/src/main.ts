@@ -14,6 +14,7 @@ import {clipboardChangeHandler} from "./clipboard-manager/clipboard-change-handl
 import {clipboardRestoreHandler} from "./clipboard-manager/clipboard-restore-handler";
 import {clipboardClearHandler} from "./clipboard-manager/clipboard-clear-handler";
 import {clipboardChangeListener} from "./clipboard-manager/clipboard-change-listener";
+import {fileProtocol} from "./utils/fileProtocol";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -46,6 +47,7 @@ if (!isSingleInstance) {
 
         // Background Processes
         await keyboardShortcuts.initialize();
+        await fileProtocol.initialize();
 
         // Clipboard Processes
         await clipboardChangeHandler.initialize();

@@ -97,7 +97,7 @@ const ClipboardListItem = ({item}: ClipboardListItemType) => {
         case "image":
             return (
                 <div className='truncate'>
-                    Image: <img className='h-9' src={value} alt='Clipboard image content'/>
+                    Image: <img className='h-9' src={`app://${value}`} alt='Clipboard image content'/>
                 </div>
             )
         default:

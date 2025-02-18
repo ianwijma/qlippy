@@ -49,11 +49,6 @@ const createSaveLoadFn = (name: 'compress' | 'decompress'): (data: ClipboardSett
                         text: await compressDecompressFn(item.metadata.text),
                     }
                 }
-            } else if (type === 'image') {
-                compressedClipboardItems[hash] = {
-                    ...item,
-                    value: await compressDecompressFn(item.value),
-                }
             } else {
                 compressedClipboardItems[hash] = item;
             }

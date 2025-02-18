@@ -3,6 +3,8 @@ import fs from 'fs/promises';
 import YAML from 'yaml'
 import {isDev} from "./isDev";
 import {app} from "electron";
+import {Buffer} from "node:buffer";
+import {Stream} from "node:stream";
 
 const FILES_DIR = isDev() ? '.files-dev' : '.files';
 const ROOT_DIR = path.resolve(app.getPath('userData'), FILES_DIR);
@@ -19,6 +21,12 @@ const normalizeFilePath = (relativePath: string): string => {
     return normalizePath;
 }
 
+export const ensureSafeFilePath = (absolutePath: string): void => {
+    if (!absolutePath.startsWith(ROOT_DIR)) {
+        throw new Error(`Path "${absolutePath}" tried to get outside our own directory, this is NOT allowed.`);
+    }
+}
+
 export const ensureDirExists = async (relativeFilePath: string): Promise<string> => {
     const normalizePath = normalizeFilePath(relativeFilePath);
 
@@ -29,7 +37,7 @@ export const ensureDirExists = async (relativeFilePath: string): Promise<string>
     return normalizePath;
 }
 
-export const readFile = async (relativeFilePath: string): Promise<string> => {
+export const readStringFile = async (relativeFilePath: string): Promise<string> => {
     const normalizePath = normalizeFilePath(relativeFilePath);
 
     return await fs.readFile(normalizePath, 'utf8');
@@ -40,21 +48,23 @@ export const ensureFileExists = async (relativeFilePath: string, defaultContent:
 
     const foundFile = await fileExists(normalizePath);
     if (!foundFile) {
-        await writeFile(normalizePath, defaultContent);
+        await writeStringToFile(normalizePath, defaultContent);
     }
 
     return normalizePath;
 }
 
-export const writeFile = async (relativeFilePath: string, content: string): Promise<void> => {
+export const writeStringToFile = async (relativeFilePath: string, content: string): Promise<string> => {
     const normalizePath = normalizeFilePath(relativeFilePath);
 
     await ensureDirExists(normalizePath);
 
     await fs.writeFile(normalizePath, content, 'utf8');
+
+    return normalizePath;
 }
 
-export const fileExists = async (relativeFilePath: string): Promise<boolean> => {
+export const fileExists = async (relativeFilePath: string): Promise<string | false> => {
     const normalizePath = normalizeFilePath(relativeFilePath);
 
     try {
@@ -63,11 +73,11 @@ export const fileExists = async (relativeFilePath: string): Promise<boolean> => 
         return false;
     }
 
-    return true;
+    return normalizePath;
 }
 
 export const readYamlFile = async <T>(relativeFilePath: string): Promise<T> => {
-    const fileContent = await readFile(relativeFilePath);
+    const fileContent = await readStringFile(relativeFilePath);
 
     return YAML.parse(fileContent) as T;
 }
@@ -75,7 +85,7 @@ export const readYamlFile = async <T>(relativeFilePath: string): Promise<T> => {
 export const writeYamlFile = async <T>(relativeFilePath: string, content: T): Promise<void> => {
     const fileContent = YAML.stringify(content);
 
-    await writeFile(relativeFilePath, fileContent);
+    await writeStringToFile(relativeFilePath, fileContent);
 }
 
 export const ensureYamlFileExists = async <T>(relativeFilePath: string, defaultContent: T): Promise<string> => {
@@ -85,7 +95,7 @@ export const ensureYamlFileExists = async <T>(relativeFilePath: string, defaultC
 }
 
 export const readJsonFile = async <T>(relativeFilePath: string): Promise<T> => {
-    const fileContent = await readFile(relativeFilePath);
+    const fileContent = await readStringFile(relativeFilePath);
 
     return JSON.parse(fileContent) as T;
 }
@@ -93,11 +103,34 @@ export const readJsonFile = async <T>(relativeFilePath: string): Promise<T> => {
 export const writeJsonFile = async <T>(relativeFilePath: string, context: T): Promise<void> => {
     const fileContent = JSON.stringify(context);
 
-    await writeFile(relativeFilePath, fileContent);
+    await writeStringToFile(relativeFilePath, fileContent);
 }
 
 export const ensureJsonFileExists = async <T>(relativeFilePath: string, defaultContent: T): Promise<string> => {
     const fileContent = JSON.stringify(defaultContent);
 
     return await ensureFileExists(relativeFilePath, fileContent);
+}
+
+export const readFile = async (relativeFilePath: string): Promise<Buffer> => {
+    const normalizePath = normalizeFilePath(relativeFilePath);
+
+    return await fs.readFile(normalizePath);
+}
+
+export const writeFile = async (
+    relativeFilePath: string,
+    content: | string
+        | NodeJS.ArrayBufferView
+        | Iterable<string | NodeJS.ArrayBufferView>
+        | AsyncIterable<string | NodeJS.ArrayBufferView>
+        | Stream
+): Promise<string> => {
+    const normalizePath = normalizeFilePath(relativeFilePath);
+
+    await ensureDirExists(normalizePath);
+
+    await fs.writeFile(normalizePath, content);
+
+    return normalizePath;
 }
