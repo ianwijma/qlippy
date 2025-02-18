@@ -16,6 +16,11 @@ export const clipboardChangeHandler = (() => {
                 if (newItem.hash !== firstClipboardHistoryHash) {
                     console.time('Add to clipboard');
 
+                    if (clipboardHistory.includes(newItem.hash)) {
+                        const index = clipboardHistory.indexOf(newItem.hash);
+                        if (index) clipboardHistory.splice(index, 1);
+                    }
+
                     // Add the item's hash to the beginning of the history
                     clipboardHistory.unshift(newItem.hash);
 
