@@ -3,6 +3,7 @@ import {
     ClipboardItem,
     ClipboardItems,
 } from "@qlippy/common/src/settings/clipboard.settings.types";
+import {useEffect, useRef} from "react";
 
 export type ClipboardListParams = {
     items: ClipboardItems,
@@ -11,14 +12,28 @@ export type ClipboardListParams = {
 }
 
 export const ClipboardList = ({ items, history, selectedIndex }: ClipboardListParams) => {
+    const selectedRef = useRef<HTMLLIElement>(null);
+
+    useEffect(() => {
+        const selectedEl = selectedRef.current;
+
+        if (!selectedEl) return;
+
+        selectedEl.scrollIntoView({block: 'nearest'});
+    }, [selectedRef, selectedIndex]);
+
     return (
         <div className="h-[-webkit-fill-available] overflow-y-auto">
             <ul>
-                {history.map((hash, index) => (
-                    <li key={hash} className={`h-8 ${selectedIndex === index ? 'bg-red-500' : ''}`} >
-                        <ClipboardListItem item={items[hash]} />
-                    </li>
-                ))}
+                {history.map((hash, index) => {
+                    const isSelected = selectedIndex === index;
+
+                    return (
+                        <li key={hash} className={`h-8 ${isSelected ? 'bg-red-500' : ''}`} ref={isSelected ? selectedRef : null} >
+                            <ClipboardListItem item={items[hash]} />
+                        </li>
+                    )
+                })}
             </ul>
         </div>
     )

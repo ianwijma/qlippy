@@ -106,7 +106,7 @@ export default function ClipboardHistoryPage() {
             }
         })
 
-        return filtered;
+        return [...new Set(filtered)];
     }, [searchableItems, searchQuery, typeFilter]);
 
     const selectNext = useCallback(() => {

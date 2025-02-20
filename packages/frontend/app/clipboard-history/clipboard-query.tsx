@@ -26,11 +26,11 @@ export const ClipboardQuery = memo(({
     const inputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
+        if (!inputRef.current) return;
+
         const inputEl = inputRef.current;
 
-        if (!inputEl) return;
-
-        inputEl.addEventListener('keydown', (event) => {
+        const handleKeyDown = (event: KeyboardEvent) => {
             switch (event.code) {
                 case 'ArrowDown':
                     event.preventDefault();
@@ -53,8 +53,12 @@ export const ClipboardQuery = memo(({
                     deleteSelected();
                     break;
             }
-        });
-    }, [inputRef]);
+        };
+
+        inputEl.addEventListener('keydown', handleKeyDown);
+
+        return () => inputEl.removeEventListener('keydown', handleKeyDown)
+    }, [inputRef, selectNext, selectPrevious, confirmSelected, close, deleteSelected]);
 
     return (
         <div className="h-full flex gap-1 justify-between items-center px-2">
