@@ -61,30 +61,35 @@ export default function ClipboardHistoryPage() {
                 const {type, value} = item;
                 switch (type) {
                     case "text":
-                    case "colour":
+                    case "colour": {
                         return {
                             hash,
                             type,
                             text: value.toLowerCase(),
                         }
+                    }
                     case "html":
                     case "url":
-                    case "path":
+                    case "path": {
                         const {metadata: { text }} = item
                         return {
                             hash,
                             type,
                             text: text.toLowerCase(),
                         }
-                    case "image":
+                    }
+                    case "image": {
                         return {
                             hash,
                             type,
                             text: `image`
                         }
+                    }
+                    default:
+                        return undefined;
                 }
             }
-        })
+        }).filter(Boolean);
     }, [items, history]);
 
     const filteredHistory = useMemo<ClipboardHash[]>(() => {
