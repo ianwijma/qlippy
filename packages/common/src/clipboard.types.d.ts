@@ -1,4 +1,4 @@
-export type ClipboardType = 'image' | 'html' | 'path' | 'url' | 'text';
+export type ClipboardType = 'image' | 'html' | 'path' | 'url' | 'colour' | 'text';
 export type ClipboardHash = string;
 export type ClipboardBaseData = {
     value: string,

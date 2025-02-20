@@ -202,7 +202,7 @@ export const clipboardChangeListener = (() => {
                         port: url.port,
                         protocol: url.protocol,
                         search: url.search,
-                        searchParams: JSON.parse('{"' + decodeURI(url.search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}'),
+                        searchParams: url.search ? JSON.parse('{"' + decodeURI(url.search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}') : {},
                         username: url.username,
                     }
                 })
