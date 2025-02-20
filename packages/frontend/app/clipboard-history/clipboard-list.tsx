@@ -1,60 +1,22 @@
-import {useSettings} from "../../hooks/useSettings";
 import {
+    ClipboardHistory,
     ClipboardItem,
-    ClipboardItemHash,
-    ClipboardSettings
+    ClipboardItems,
 } from "@qlippy/common/src/settings/clipboard.settings.types";
-import {useMemo} from "react";
 
-type SearchableItem = {
-    hash: ClipboardItemHash,
-    searchableText: string,
+export type ClipboardListParams = {
+    items: ClipboardItems,
+    history: ClipboardHistory,
+    selectedIndex: number
 }
 
-export const ClipboardList = () => {
-    const {isLoading, settings} = useSettings<ClipboardSettings>('clipboard');
-    const {clipboardItems = {}} = settings ?? {}
-
-    const searchableItems = useMemo<SearchableItem[]>(() => {
-        if (isLoading) return [];
-
-        const {clipboardHistory, clipboardItems} = settings;
-
-        return clipboardHistory.map((hash: ClipboardItemHash) => {
-            const item = clipboardItems[hash] ?? undefined;
-            if (item) {
-                const {type, value} = item;
-                switch (type) {
-                    case "text":
-                    case "colour":
-                        return {
-                            hash,
-                            searchableText: value.toLowerCase(),
-                        }
-                    case "html":
-                    case "url":
-                    case "path":
-                        const {metadata: { text }} = item
-                        return {
-                            hash,
-                            searchableText: text.toLowerCase(),
-                        }
-                    case "image":
-                        return {
-                            hash,
-                            searchableText: `image`
-                        }
-                }
-            }
-        })
-    }, [settings])
-
+export const ClipboardList = ({ items, history, selectedIndex }: ClipboardListParams) => {
     return (
         <div className="h-[-webkit-fill-available] overflow-y-auto">
             <ul>
-                {searchableItems.map(({hash}) => (
-                    <li key={hash} className='h-8'>
-                        <ClipboardListItem item={clipboardItems[hash]} />
+                {history.map((hash, index) => (
+                    <li key={hash} className={`h-8 ${selectedIndex === index ? 'bg-red-500' : ''}`} >
+                        <ClipboardListItem item={items[hash]} />
                     </li>
                 ))}
             </ul>
@@ -62,11 +24,11 @@ export const ClipboardList = () => {
     )
 }
 
-type ClipboardListItemType = {
-    item: undefined | ClipboardItem
+type ClipboardListItemParams = {
+    item: ClipboardItem,
 }
 
-const ClipboardListItem = ({item}: ClipboardListItemType) => {
+const ClipboardListItem = ({item}: ClipboardListItemParams) => {
     const {type, value, metadata} = item;
 
     switch (type) {
