@@ -12,6 +12,15 @@ backendPackage.version = `${currentVersion}.${commitHash}`;
 
 fs.writeJson('packages/backend/package.json', backendPackage, {spaces: 2});
 
+const restore = () => {
+    backendPackage.version = currentVersion;
+    fs.writeJson('packages/backend/package.json', backendPackage, {spaces: 2});
+}
+
+process.on("SIGINT", () => {
+    restore();
+});
+
 try {
 
     echo`~~~ Cleaning up previous build files...`
@@ -47,7 +56,5 @@ try {
 } catch {
     // Don't really care
 } finally {
-    // Restore the package.json
-    backendPackage.version = currentVersion;
-    fs.writeJson('packages/backend/package.json', backendPackage, {spaces: 2});
+    restore()
 }
