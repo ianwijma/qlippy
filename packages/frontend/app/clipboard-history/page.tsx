@@ -50,7 +50,7 @@ export default function ClipboardHistoryPage() {
     const updateTypeFilter = useCallback((type: '' | ClipboardType) => {
         setTypeFilter(type);
         setSelectedIndex(0);
-    }, [setQuery]);
+    }, [setTypeFilter]);
 
     const searchQuery = useMemo(() => query.toLowerCase(), [query]);
 
