@@ -126,18 +126,28 @@ export default function ClipboardHistoryPage() {
     }, [filteredHistory, selectedIndex, setSelectedIndex]);
 
     const restoreSelected = useCallback(() => {
-        eventHandler.emit<RestoreClipboardHistoryEventData>(restoreClipboardHistoryEventName, {
-            hash: filteredHistory[selectedIndex]
-        });
+        const hash = filteredHistory[selectedIndex];
+
+        if (hash) {
+            eventHandler.emit<RestoreClipboardHistoryEventData>(restoreClipboardHistoryEventName, {
+                hash: filteredHistory[selectedIndex]
+            });
+        }
 
         close();
     }, [filteredHistory, selectedIndex]);
 
     const clearSelected = useCallback(() => {
-        eventHandler.emit<ClearClipboardHistoryEventData>(clearClipboardHistoryEventName, {hashes: [
-            filteredHistory[selectedIndex]
-        ]});
-    }, [filteredHistory, selectedIndex]);
+        const hash = filteredHistory[selectedIndex];
+
+        if (hash) {
+            eventHandler.emit<ClearClipboardHistoryEventData>(clearClipboardHistoryEventName, {hashes: [
+                filteredHistory[selectedIndex]
+            ]});
+        }
+
+        if (selectedIndex === filteredHistory.length - 1) setSelectedIndex(selectedIndex - 1);
+    }, [filteredHistory, selectedIndex, setSelectedIndex]);
 
     const handleClose = useCallback(() => close(), [close])
 
