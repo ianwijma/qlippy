@@ -72,6 +72,15 @@ export type UrlClipboardData = ClipboardBaseData & {
     }
 }
 
+export type ColourClipboardData = ClipboardBaseData & {
+    type: 'colour',
+    metadata: {
+        isHex: boolean,
+        isShortHex: boolean,
+        isTransparentHex: boolean,
+    }
+}
+
 export type TextClipboardData = ClipboardBaseData & {
     type: 'text',
     metadata: {
@@ -83,4 +92,5 @@ export type ClipboardData = ImageClipboardData
     | HtmlClipboardData
     | PathClipboardData
     | UrlClipboardData
+    | ColourClipboardData
     | TextClipboardData;

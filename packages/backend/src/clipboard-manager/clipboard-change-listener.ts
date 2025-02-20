@@ -12,6 +12,10 @@ const CLIPBOARD_CHECK_INTERVAL_MS = 250;
 
 const CLIPBOARD_STORAGE_PATH = 'clipboard-files';
 
+const HEX_COLOUR_SHORT_REGEX = /^#([0-9A-F]{3}){1,2}$/i;
+const HEX_COLOUR_REGEX = /^#[0-9A-F]{6}$/i;
+const HEX_COLOUR_TRANSPARENT_REGEX = /^#[0-9A-F]{6}[0-9a-f]{0,2}$/i;
+
 const getPathStats = async (path: string): Promise<Stats | false> => {
     return fs.stat(path).catch(() => false);
 }
@@ -78,7 +82,34 @@ export const clipboardChangeListener = (() => {
             return; // Is handle
         }
 
-        // Secondly we're getting the HTML, as HTML also contains the text in the HTML.
+        // We're getting the text, for colour checking, as some colours are copied from an IDE, which involves HTML, we need to first check for colours.
+        const text = clipboard.readText('clipboard');
+
+        const colourText = text.trim();
+        const isShortHex = HEX_COLOUR_SHORT_REGEX.test(colourText);
+        const isHex = HEX_COLOUR_REGEX.test(colourText);
+        const isTransparentHex = HEX_COLOUR_TRANSPARENT_REGEX.test(colourText);
+        if (isHex || isShortHex || isTransparentHex) {
+            const colourTextHash = sha1(colourText);
+            if (isHashDifferent('text', colourTextHash)) {
+                updateHash('text', colourTextHash);
+
+                emit({
+                    type: 'colour',
+                    value: colourText,
+                    hash: colourTextHash,
+                    metadata: {
+                        isHex,
+                        isShortHex,
+                        isTransparentHex
+                    }
+                })
+            }
+
+            return; // Is Handled
+        }
+
+        // We're getting the HTML, as HTML also contains the text in the HTML.
         const html = clipboard.readHTML('clipboard');
         if (html.trim() !== '') {
             const htmlHash = sha1(html);
@@ -103,10 +134,7 @@ export const clipboardChangeListener = (() => {
             return; // Is handle
         }
 
-        // Lastly we're getting the text, where after we're doing a bunch of checks against.
-        const text = clipboard.readText('clipboard');
-
-        // First text check we're checking if it contains a local path.
+        // Text check we're checking if it contains a local path.
         const path = text.trim();
         const pathStats = path !== '' && await getPathStats(path);
         if (pathStats) {
@@ -149,7 +177,7 @@ export const clipboardChangeListener = (() => {
             return; // Is handle
         }
 
-        // Second text check we're checking if it contains a valid URL.
+        // Text check we're checking if it contains a valid URL.
         const possibleUrl = text.trim();
         const url = possibleUrl !== '' && getUrl(possibleUrl);
         if (url) {
@@ -183,7 +211,8 @@ export const clipboardChangeListener = (() => {
             return; // Is handle
         }
 
-        // Last text check we're checking if is not empty.
+
+        // Text check we're checking if is not empty.
         if (text.trim() !== '') {
             const textHash = sha1(text);
             if (isHashDifferent('text', textHash)) {
@@ -217,7 +246,7 @@ export const clipboardChangeListener = (() => {
 
                         await sleep(CLIPBOARD_CHECK_INTERVAL_MS);
                     }
-                })()
+                })().catch(console.error);
             }
         },
         onChange: (callback: (data: ClipboardData) => void) => eventEmitter.on('change', callback)

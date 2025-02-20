@@ -16,6 +16,7 @@ interface ClipboardChangeEvents {
     'html': (data: HtmlClipboardData) => void,
     'path': (data: PathClipboardData) => void,
     'url': (data: UrlClipboardData) => void,
+    'colour': (data: UrlClipboardData) => void,
     'text': (data: TextClipboardData) => void,
 
     // The * is triggers AFTER any specific event.
