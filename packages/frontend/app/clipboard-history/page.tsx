@@ -45,12 +45,12 @@ export default function ClipboardHistoryPage() {
     const updateQuery = useCallback((query: string) => {
         setQuery(query);
         setSelectedIndex(0);
-    }, [setQuery]);
+    }, [setQuery, setSelectedIndex]);
 
     const updateTypeFilter = useCallback((type: '' | ClipboardType) => {
         setTypeFilter(type);
         setSelectedIndex(0);
-    }, [setTypeFilter]);
+    }, [setTypeFilter, setSelectedIndex]);
 
     const searchQuery = useMemo(() => query.toLowerCase(), [query]);
 
