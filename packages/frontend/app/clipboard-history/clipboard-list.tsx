@@ -23,19 +23,17 @@ export const ClipboardList = ({ items, history, selectedIndex }: ClipboardListPa
     }, [selectedRef, selectedIndex]);
 
     return (
-        <div className="h-[-webkit-fill-available] overflow-y-auto">
-            <ul>
-                {history.map((hash, index) => {
-                    const isSelected = selectedIndex === index;
+        <ul>
+            {history.map((hash, index) => {
+                const isSelected = selectedIndex === index;
 
-                    return (
-                        <li key={hash} className={`h-8 ${isSelected ? 'bg-red-500' : ''}`} ref={isSelected ? selectedRef : null} >
-                            <ClipboardListItem item={items[hash]} />
-                        </li>
-                    )
-                })}
-            </ul>
-        </div>
+                return (
+                    <li key={hash} className={`h-8 ${isSelected ? 'bg-red-500' : ''}`} ref={isSelected ? selectedRef : null} >
+                        <ClipboardListItem item={items[hash]} />
+                    </li>
+                )
+            })}
+        </ul>
     )
 }
 

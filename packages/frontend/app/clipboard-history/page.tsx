@@ -152,9 +152,9 @@ export default function ClipboardHistoryPage() {
     const handleClose = useCallback(() => close(), [close])
 
     return (
-        <div className="bg-slate-500 h-screen p-2 draggable overflow-hidden">
-            <div className="flex flex-col gap-1 h-full">
-                <div className="bg-red-500 h-20 not-draggable">
+        <div className="bg-slate-500 draggable">
+            <div className="h-screen w-screen max-w-full grid gap-1 grid-rows-[5rem_1fr] grid-cols-[2fr_3fr]">
+                <div className="bg-red-500 not-draggable col-span-2 row-span-1">
                     <ClipboardQuery
                         query={query}
                         updateQuery={updateQuery}
@@ -167,13 +167,11 @@ export default function ClipboardHistoryPage() {
                         close={handleClose}
                     />
                 </div>
-                <div className="flex gap-1 h-[inherit]">
-                    <div className="bg-green-500 w-2/5 not-draggable">
-                        <ClipboardList items={items} history={filteredHistory} selectedIndex={selectedIndex} />
-                    </div>
-                    <div className="bg-pink-500 w-3/5 not-draggable">
-                        <ClipboardDetails item={selectedItem} />
-                    </div>
+                <div className="bg-green-500 not-draggable row-span-1 col-span-1 overflow-y-auto overflow-x-hidden">
+                    <ClipboardList items={items} history={filteredHistory} selectedIndex={selectedIndex}/>
+                </div>
+                <div className="bg-pink-500 not-draggable row-span-1 col-span-1">
+                    <ClipboardDetails item={selectedItem}/>
                 </div>
             </div>
         </div>
