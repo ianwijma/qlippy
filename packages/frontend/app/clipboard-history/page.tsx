@@ -170,7 +170,7 @@ export default function ClipboardHistoryPage() {
                 <div className="bg-green-500 not-draggable row-span-1 col-span-1 overflow-y-auto overflow-x-hidden">
                     <ClipboardList items={items} history={filteredHistory} selectedIndex={selectedIndex}/>
                 </div>
-                <div className="bg-pink-500 not-draggable row-span-1 col-span-1">
+                <div className="bg-pink-500 not-draggable row-span-1 col-span-1 overflow-y-auto overflow-x-hidden">
                     <ClipboardDetails item={selectedItem}/>
                 </div>
             </div>
