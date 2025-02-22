@@ -149,6 +149,7 @@ export const clipboardChangeListener = (() => {
                     hash: pathHash,
                     metadata: {
                         text,
+                        length: path.length,
                         isBlockDevice: pathStats.isBlockDevice(),
                         isCharacterDevice: pathStats.isCharacterDevice(),
                         isDirectory: pathStats.isDirectory(),
@@ -192,6 +193,7 @@ export const clipboardChangeListener = (() => {
                     hash: urlStringHash,
                     metadata: {
                         text,
+                        length: urlString.length,
                         hash: url.hash,
                         host: url.host,
                         hostname: url.hostname,
