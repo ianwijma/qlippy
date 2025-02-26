@@ -33,7 +33,6 @@ export const clipboardChangeHandler = (() => {
                     while (history.length > CLIPBOARD_AMOUNT_LIMIT) {
                         const removedId = history.pop();
                         const removeHash = historyIdToItemHash[removedId];
-                        delete items[removedId];
 
                         // Only remove if there are no hash reference anymore
                         if (!Object.values(historyIdToItemHash).includes(removeHash)) {
