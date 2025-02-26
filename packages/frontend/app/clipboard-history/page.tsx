@@ -43,10 +43,10 @@ export default function ClipboardHistoryPage() {
         history: isLoading ? [] as ClipboardHistory : settings.history,
     }), [isLoading, settings]);
 
-    const selectedItem = useMemo<ClipboardItem>(() => {
-        const id = history[selectedIndex];
-        const hash = historyIdToItemHash[id];
-        return items[hash];
+    const selectedItem = useMemo<ClipboardItem | undefined>(() => {
+        const id = history?.[selectedIndex];
+        const hash = historyIdToItemHash?.[id];
+        return items?.[hash];
     }, [selectedIndex, items, historyIdToItemHash, history]);
 
     const itemToHistoryIdMap = useMemo<{[key: ClipboardHistoryId]: ClipboardItem}>(() => {
