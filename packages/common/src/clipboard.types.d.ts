@@ -28,6 +28,7 @@ export type HtmlClipboardData = ClipboardBaseData & {
 export type PathClipboardData = ClipboardBaseData & {
     type: 'path',
     metadata: {
+        length: number,
         text: string, // The original text
         isBlockDevice: boolean,
         isCharacterDevice: boolean,
@@ -56,6 +57,7 @@ export type PathClipboardData = ClipboardBaseData & {
 export type UrlClipboardData = ClipboardBaseData & {
     type: 'url',
     metadata: {
+        length: number,
         text: string, // The original text
         hash: string,
         host: string,

@@ -10,6 +10,7 @@ export const clipboardHistoryWindow = createWindow({
     minHeight: 640,
     resizable: false,
     alwaysOnTop: true,
+    transparent: true,
     posY: 150,
     onBlur: ({close}) => isDev() || close(),
 });

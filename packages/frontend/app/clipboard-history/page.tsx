@@ -151,6 +151,26 @@ export default function ClipboardHistoryPage() {
 
     const handleClose = useCallback(() => close(), [close])
 
+    const handleHover = useCallback((hash: ClipboardHash) => {
+        // const index = filteredHistory.indexOf(hash);
+        //
+        // if (index >= 0 && index < filteredHistory.length) {
+        //     setSelectedIndex(index);
+        // } else {
+        //     setSelectedIndex(0);
+        // }
+    }, [setSelectedIndex, filteredHistory]);
+
+    const handleClicked = useCallback((hash: ClipboardHash) => {
+        // if (hash) {
+        //     eventHandler.emit<RestoreClipboardHistoryEventData>(restoreClipboardHistoryEventName, {
+        //         hash: filteredHistory[selectedIndex]
+        //     });
+        // }
+        //
+        // close();
+    }, [setSelectedIndex, filteredHistory]);
+
     return (
         <div className="bg-slate-500 draggable">
             <div className="h-screen w-screen max-w-full grid gap-1 grid-rows-[5rem_1fr] grid-cols-[2fr_3fr]">
@@ -168,7 +188,7 @@ export default function ClipboardHistoryPage() {
                     />
                 </div>
                 <div className="bg-green-500 not-draggable row-span-1 col-span-1 overflow-y-auto overflow-x-hidden">
-                    <ClipboardList items={items} history={filteredHistory} selectedIndex={selectedIndex}/>
+                    <ClipboardList items={items} history={filteredHistory} selectedIndex={selectedIndex} onItemHover={handleHover} onItemClicked={handleClicked} />
                 </div>
                 <div className="bg-pink-500 not-draggable row-span-1 col-span-1 overflow-y-auto overflow-x-hidden">
                     <ClipboardDetails item={selectedItem}/>
