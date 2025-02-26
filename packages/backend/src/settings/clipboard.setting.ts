@@ -69,6 +69,4 @@ export const clipboardSettings = createSettings<ClipboardSettings>({
         clipboardHistory: [],
         clipboardItems: {},
     },
-    preSaveFn: createSaveLoadFn('compress'),
-    postLoadFn: createSaveLoadFn('decompress'),
 });
