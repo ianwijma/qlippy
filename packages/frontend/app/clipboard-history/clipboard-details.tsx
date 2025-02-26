@@ -7,11 +7,11 @@ export const ClipboardDetails = memo(({item}: ClipboardDetailsParams) => {
     if (!item) return '';
 
     return (
-        <div className='h-full overflow-y-auto'>
-            <div className='h-3/5 overflow-auto'>
+        <div className='h-full not-draggable overflow-y-auto flex flex-col gap-2'>
+            <div className='h-3/5 overflow-auto bg-opacity-70 bg-white'>
                 <Details item={item} />
             </div>
-            <div className=''>
+            <div className='h-2/5 not-draggable bg-opacity-70 bg-white rounded-br-lg'>
                 <Metadata item={item} />
             </div>
         </div>
@@ -113,7 +113,7 @@ const Metadata = ({ item }: MetadataProps) => {
     const metadata= getMetadataFromType(item);
 
     return (
-        <ul>
+        <ul className='text-gray-500'>
             {Object.keys(metadata).map(key => {
                 const value: string | any = metadata[key];
 

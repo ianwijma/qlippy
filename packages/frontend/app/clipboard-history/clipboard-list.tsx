@@ -26,14 +26,14 @@ export const ClipboardList = ({ items, history, selectedIndex, onItemHover, onIt
     }, [selectedRef, selectedIndex]);
 
     return (
-        <ul>
+        <ul className='not-draggable flex flex-col gap-1'>
             {history.map((id, index) => {
                 const isSelected = selectedIndex === index;
 
                 return (
                     <li
                         key={id}
-                        className={`h-8 ${isSelected ? 'bg-red-500' : ''}`}
+                        className={`h-8 text-gray-500 flex items-center pl-1 bg-opacity-70 ${isSelected ? 'bg-gray-200' : 'bg-white'}`}
                         ref={isSelected ? selectedRef : null}
                         onMouseEnter={() => onItemHover(id)}
                         onClick={() => onItemClicked(id)}

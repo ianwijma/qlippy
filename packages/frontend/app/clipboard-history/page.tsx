@@ -186,9 +186,9 @@ export default function ClipboardHistoryPage() {
     }, [setSelectedIndex, filteredHistory]);
 
     return (
-        <div className="bg-slate-500 draggable">
-            <div className="h-screen w-screen max-w-full grid gap-1 grid-rows-[5rem_1fr] grid-cols-[2fr_3fr]">
-                <div className="bg-red-500 not-draggable col-span-2 row-span-1">
+        <div className="draggable bg-opacity-70 bg-white rounded-xl">
+            <div className="h-screen w-screen max-w-full grid gap-2 p-2 grid-rows-[3rem_1fr] grid-cols-[2fr_3fr]">
+                <div className="col-span-2 row-span-1">
                     <ClipboardQuery
                         query={query}
                         updateQuery={updateQuery}
@@ -201,10 +201,10 @@ export default function ClipboardHistoryPage() {
                         close={handleClose}
                     />
                 </div>
-                <div className="bg-green-500 not-draggable row-span-1 col-span-1 overflow-y-auto overflow-x-hidden">
+                <div className="row-span-1 col-span-1 overflow-y-auto overflow-x-hidden rounded-bl-lg">
                     <ClipboardList items={itemToHistoryIdMap} history={filteredHistory} selectedIndex={selectedIndex} onItemHover={handleHover} onItemClicked={handleClicked} />
                 </div>
-                <div className="bg-pink-500 not-draggable row-span-1 col-span-1 overflow-y-auto overflow-x-hidden">
+                <div className="row-span-1 col-span-1 overflow-y-auto overflow-x-hidden">
                     <ClipboardDetails item={selectedItem}/>
                 </div>
             </div>
