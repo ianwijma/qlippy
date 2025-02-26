@@ -68,11 +68,12 @@ const getMetadataFromType = (item: ClipboardItem) => {
                 "Url hash": metadata.hash,
                 "Url query": metadata.searchParams,
             };
-        case "path":
+        case "path": {
             const defaultFirstData = {
                 "Path": value,
                 "Path length": metadata.length,
             }
+
             const defaultRestData = {
                 "User ID": metadata.userId,
                 "Group ID": metadata.groupId,
@@ -94,6 +95,7 @@ const getMetadataFromType = (item: ClipboardItem) => {
                 ...defaultFirstData,
                 ...defaultRestData,
             };
+        }
         case "colour":
             return {};
         case "image":
