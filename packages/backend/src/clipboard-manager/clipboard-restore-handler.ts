@@ -20,7 +20,7 @@ export const clipboardRestoreHandler = (() => {
 
                         // Remove from history
                         const index = history.indexOf(id);
-                        if (index) history.splice(index, 1);
+                        if (index !== -1) history.splice(index, 1);
 
                         await clipboardSettings.updateSettings({
                             ...settings,
