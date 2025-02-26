@@ -41,7 +41,7 @@ export const clipboardChangeHandler = (() => {
                         }
 
                         // remove from history
-                        delete historyIdToItemHash[removeHash];
+                        delete historyIdToItemHash[removedId];
                     }
 
                     console.timeLog('Add to clipboard', 'cleaned');
