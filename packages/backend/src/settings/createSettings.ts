@@ -9,6 +9,8 @@ import {
     type SettingsRequestReq,
     type SettingsRequestRes
 } from '@qlippy/common/src/requests/settings.request'
+import diff from 'git-diff'
+import {isDebug} from "../utils/isDebug";
 
 export type SettingsName = string;
 
@@ -51,7 +53,7 @@ export const createSettings = <T extends BaseSettings>({
     const getSettings = () => {
         isInitialized();
 
-        return settingsCache;
+        return JSON.parse(JSON.stringify(settingsCache));
     };
 
     const syncSettings = async () => {
@@ -66,6 +68,11 @@ export const createSettings = <T extends BaseSettings>({
     }
 
     const updateSettings = async (settingToUpdate: T): Promise<T> => {
+        let preUpdate = '';
+        if (isDebug()) {
+            preUpdate = JSON.stringify(getSettings(), null, 2);
+        }
+
         const formattedSettings = await preSaveFn(settingToUpdate);
 
         await writeYamlFile<T>(settingsFilePath, formattedSettings);
@@ -73,6 +80,18 @@ export const createSettings = <T extends BaseSettings>({
         await syncSettings();
 
         const updatedSettings = getSettings();
+
+        let postUpdate = '';
+        if (isDebug()) {
+            postUpdate = JSON.stringify(updatedSettings, null, 2);
+        }
+
+        if (isDebug()) {
+            const updateDiff = diff(preUpdate, postUpdate, {
+                color: true,
+            });
+            console.log(updateDiff);
+        }
 
         eventHandler.emit<SettingsUpdatedEventData<T>>(settingsUpdatedEventName, {
             settingName: name,
@@ -91,6 +110,7 @@ export const createSettings = <T extends BaseSettings>({
         const resettedSettings = getSettings();
 
         console.log('Settings reset', {name, settings: JSON.stringify(resettedSettings)});
+
         eventHandler.emit<SettingsUpdatedEventData<T>>(settingsUpdatedEventName, {
             settingName: name,
             updatedSettings: resettedSettings,

@@ -1,7 +1,7 @@
-import {ClipboardItemId} from "../settings/clipboard.settings.types";
+import {ClipboardHistoryId} from "../settings/clipboard.settings.types";
 
 export const restoreClipboardHistoryEventName = 'restoreClipboardHistory';
 
 export type RestoreClipboardHistoryEventData = {
-    id: ClipboardItemId;
+    id: ClipboardHistoryId;
 };

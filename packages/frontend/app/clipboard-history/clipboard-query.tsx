@@ -49,16 +49,16 @@ export const ClipboardQuery = memo(({
     }, [selectNext, selectPrevious, confirmSelected, close, deleteSelected]);
 
     return (
-        <div className="h-full flex gap-1 justify-between items-center px-2">
+        <div className="h-full flex gap-1 justify-between items-center">
             <input
                 value={query}
                 onChange={(e) => updateQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className='text-gray-500 w-4/5 h-12 px-2'
+                className='not-draggable bg-opacity-70 bg-white text-gray-500 w-4/5 h-full px-2 rounded-tl-lg'
                 placeholder='Type to filter through entries...'
             />
             <select
-                className='text-gray-500 w-1/5 h-12'
+                className='not-draggable bg-opacity-70 bg-white text-gray-500 w-1/5 h-full rounded-tr-lg'
                 value={typeFilter}
                 onChange={(e) => updateTypeFilter(e.target.value)}
             >
