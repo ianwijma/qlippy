@@ -1,5 +1,6 @@
 import {createWindow} from "./createWindow";
 import {isDev} from "../utils/isDev";
+import {isDebug} from "../utils/isDebug";
 
 export const clipboardHistoryWindow = createWindow({
     title: 'Clipboard history',
@@ -12,5 +13,5 @@ export const clipboardHistoryWindow = createWindow({
     alwaysOnTop: true,
     transparent: true,
     posY: 150,
-    onBlur: ({close}) => isDev() || close(),
+    onBlur: ({close}) => isDebug() || close(),
 });
