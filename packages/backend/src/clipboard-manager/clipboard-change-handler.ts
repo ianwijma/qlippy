@@ -10,35 +10,35 @@ export const clipboardChangeHandler = (() => {
         initialize: async () => {
             emitter.on('*', async (newItem) => {
                 const settings = clipboardSettings.getSettings();
-                const {clipboardHistory, clipboardItems} = settings;
-                const [firstClipboardHistoryHash = undefined] = clipboardHistory;
+                const {history, idToHashMap, items} = settings;
+                const [firstHistoryItemId = undefined] = history;
 
-                if (newItem.hash !== firstClipboardHistoryHash) {
+                if (newItem.id !== firstHistoryItemId) {
                     console.time('Add to clipboard');
 
-                    if (clipboardHistory.includes(newItem.hash)) {
-                        const index = clipboardHistory.indexOf(newItem.hash);
-                        if (index) clipboardHistory.splice(index, 1);
-                    }
+                    // Add the item's id to the beginning of the history
+                    history.unshift(newItem.id);
 
-                    // Add the item's hash to the beginning of the history
-                    clipboardHistory.unshift(newItem.hash);
+                    // Add item to has idToHashMap
+                    idToHashMap[newItem.id] = newItem.hash;
 
                     // Add the item to the clipboard itself
-                    clipboardItems[newItem.hash] = newItem
+                    items[newItem.hash] = newItem
 
                     // Check if we're over our hard limit;
-                    while (clipboardHistory.length > CLIPBOARD_AMOUNT_LIMIT) {
-                        const removedHash = clipboardHistory.pop();
-                        delete clipboardItems[removedHash];
+                    while (history.length > CLIPBOARD_AMOUNT_LIMIT) {
+                        const removedId = history.pop();
+                        const removeHash = idToHashMap[removedId];
+                        delete items[removedId];
+                        delete idToHashMap[removeHash];
                     }
 
                     console.timeLog('Add to clipboard', 'cleaned');
 
                     await clipboardSettings.updateSettings({
                         ...settings,
-                        clipboardHistory,
-                        clipboardItems
+                        history: history,
+                        items: items
                     });
 
                     console.timeEnd('Add to clipboard');

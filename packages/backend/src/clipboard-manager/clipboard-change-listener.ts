@@ -7,6 +7,7 @@ import {ClipboardData, ClipboardHash, ClipboardType} from "@qlippy/common/src/cl
 import {fileExists, writeFile} from "../utils/files";
 import { join as pathJoin } from 'node:path'
 import {sleep} from "../utils/sleep";
+import {nanoid} from "nanoid";
 
 const CLIPBOARD_CHECK_INTERVAL_MS = 250;
 
@@ -69,6 +70,7 @@ export const clipboardChangeListener = (() => {
                 }
 
                 emit({
+                    id: nanoid(),
                     type: 'image',
                     value: fileStoragePath,
                     hash: imageHash,
@@ -95,10 +97,12 @@ export const clipboardChangeListener = (() => {
                 updateHash('text', colourTextHash);
 
                 emit({
+                    id: nanoid(),
                     type: 'colour',
                     value: colourText,
                     hash: colourTextHash,
                     metadata: {
+                        text,
                         isHex,
                         isShortHex,
                         isTransparentHex
@@ -120,6 +124,7 @@ export const clipboardChangeListener = (() => {
                 const htmlText = clipboard.readText('clipboard');
 
                 emit({
+                    id: nanoid(),
                     type: 'html',
                     value: html,
                     hash: htmlHash,
@@ -144,6 +149,7 @@ export const clipboardChangeListener = (() => {
                 updateHash('path', pathHash)
 
                 emit({
+                    id: nanoid(),
                     type: 'path',
                     value: path,
                     hash: pathHash,
@@ -188,6 +194,7 @@ export const clipboardChangeListener = (() => {
                 updateHash('url', urlStringHash);
 
                 emit({
+                    id: nanoid(),
                     type: 'url',
                     value: urlString,
                     hash: urlStringHash,
@@ -221,6 +228,7 @@ export const clipboardChangeListener = (() => {
                 updateHash('text', textHash);
 
                 emit({
+                    id: nanoid(),
                     type: 'text',
                     value: text,
                     hash: textHash,

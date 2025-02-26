@@ -4,10 +4,12 @@ import {ClipboardQuery} from "./clipboard-query";
 import {ClipboardList} from "./clipboard-list";
 import {ClipboardDetails} from "./clipboard-details";
 import {useCallback, useMemo, useState} from "react";
-import {ClipboardHash, ClipboardType} from "@qlippy/common/src/clipboard.types";
+import {ClipboardType} from "@qlippy/common/src/clipboard.types";
 import {useSettings} from "../../hooks/useSettings";
 import {
-    ClipboardHistory, ClipboardItem, ClipboardItemHash,
+    ClipboardHistory, ClipboardIdToHashMap,
+    ClipboardItem,
+    ClipboardItemId,
     ClipboardItems,
     ClipboardSettings
 } from "@qlippy/common/src/settings/clipboard.settings.types";
@@ -23,7 +25,7 @@ import {
 import {useWindowControls} from "../../hooks/useWindowControls";
 
 export type SearchableItem = {
-    hash: ClipboardItemHash,
+    id: ClipboardItemId,
     type: ClipboardType,
     text: string,
 }
@@ -35,12 +37,25 @@ export default function ClipboardHistoryPage() {
     const [selectedIndex, setSelectedIndex] = useState<number>(0);
     const {isLoading, settings} = useSettings<ClipboardSettings>('clipboard');
 
-    const {items, history} = useMemo<{items: ClipboardItems, history: ClipboardHistory}>(() => ({
-        items: isLoading ? {} : settings.clipboardItems,
-        history: isLoading ? [] as ClipboardHistory : settings.clipboardHistory,
+    const {items, idToHashMap, history} = useMemo<{items: ClipboardItems, history: ClipboardHistory, idToHashMap: ClipboardIdToHashMap}>(() => ({
+        items: isLoading ? {} : settings.items,
+        idToHashMap: isLoading ? {} as ClipboardIdToHashMap : settings.idToHashMap,
+        history: isLoading ? [] as ClipboardHistory : settings.history,
     }), [isLoading, settings]);
 
-    const selectedItem = useMemo<ClipboardItem>(() => items[history[selectedIndex]] ?? undefined, [selectedIndex, items, history]);
+    const selectedItem = useMemo<ClipboardItem>(() => {
+        const id = history[selectedIndex];
+        const hash = idToHashMap[id];
+        return items[hash];
+    }, [selectedIndex, items, idToHashMap, history]);
+
+    const itemToHistoryIdMap = useMemo<{[key: ClipboardItemId]: ClipboardItem}>(() => {
+        return history.reduce((acc, id) => {
+            const hash = idToHashMap[id];
+            acc[id] = items[hash];
+            return acc
+        }, {})
+    }, [items, idToHashMap, history])
 
     const updateQuery = useCallback((query: string) => {
         setQuery(query);
@@ -55,7 +70,8 @@ export default function ClipboardHistoryPage() {
     const searchQuery = useMemo(() => query.toLowerCase(), [query]);
 
     const searchableItems = useMemo<SearchableItem[]>(() => {
-        return history.map((hash: ClipboardItemHash) => {
+        return history.map((id: ClipboardItemId) => {
+            const hash = idToHashMap[id];
             const item = items[hash] ?? undefined;
             if (item) {
                 const {type, value} = item;
@@ -63,7 +79,7 @@ export default function ClipboardHistoryPage() {
                     case "text":
                     case "colour": {
                         return {
-                            hash,
+                            id,
                             type,
                             text: value.toLowerCase(),
                         }
@@ -73,14 +89,14 @@ export default function ClipboardHistoryPage() {
                     case "path": {
                         const {metadata: { text }} = item
                         return {
-                            hash,
+                            id,
                             type,
                             text: text.toLowerCase(),
                         }
                     }
                     case "image": {
                         return {
-                            hash,
+                            id,
                             type,
                             text: `image`
                         }
@@ -92,17 +108,17 @@ export default function ClipboardHistoryPage() {
         }).filter(Boolean);
     }, [items, history]);
 
-    const filteredHistory = useMemo<ClipboardHash[]>(() => {
+    const filteredHistory = useMemo<ClipboardItemId[]>(() => {
         const filtered = [];
 
-        searchableItems.forEach(({ text, type, hash }) => {
+        searchableItems.forEach(({ text, type, id }) => {
             const textMatch = text.includes(searchQuery);
 
             const typeSearch = typeFilter !== '';
             const typeMatch = typeSearch ? typeFilter === type : true;
 
             if (textMatch && typeMatch) {
-                filtered.push(hash);
+                filtered.push(id);
             }
         })
 
@@ -126,22 +142,20 @@ export default function ClipboardHistoryPage() {
     }, [filteredHistory, selectedIndex, setSelectedIndex]);
 
     const restoreSelected = useCallback(() => {
-        const hash = filteredHistory[selectedIndex];
+        const id = filteredHistory[selectedIndex];
 
-        if (hash) {
-            eventHandler.emit<RestoreClipboardHistoryEventData>(restoreClipboardHistoryEventName, {
-                hash: filteredHistory[selectedIndex]
-            });
+        if (id) {
+            eventHandler.emit<RestoreClipboardHistoryEventData>(restoreClipboardHistoryEventName, { id });
         }
 
         close();
     }, [filteredHistory, selectedIndex]);
 
     const clearSelected = useCallback(() => {
-        const hash = filteredHistory[selectedIndex];
+        const id = filteredHistory[selectedIndex];
 
-        if (hash) {
-            eventHandler.emit<ClearClipboardHistoryEventData>(clearClipboardHistoryEventName, {hashes: [
+        if (id) {
+            eventHandler.emit<ClearClipboardHistoryEventData>(clearClipboardHistoryEventName, {ids: [
                 filteredHistory[selectedIndex]
             ]});
         }
@@ -151,24 +165,24 @@ export default function ClipboardHistoryPage() {
 
     const handleClose = useCallback(() => close(), [close])
 
-    const handleHover = useCallback((hash: ClipboardHash) => {
-        // const index = filteredHistory.indexOf(hash);
-        //
-        // if (index >= 0 && index < filteredHistory.length) {
-        //     setSelectedIndex(index);
-        // } else {
-        //     setSelectedIndex(0);
-        // }
+    const handleHover = useCallback((id: ClipboardItemId) => {
+        const index = filteredHistory.indexOf(id);
+
+        if (index >= 0 && index < filteredHistory.length) {
+            setSelectedIndex(index);
+        } else {
+            setSelectedIndex(0);
+        }
     }, [setSelectedIndex, filteredHistory]);
 
-    const handleClicked = useCallback((hash: ClipboardHash) => {
-        // if (hash) {
-        //     eventHandler.emit<RestoreClipboardHistoryEventData>(restoreClipboardHistoryEventName, {
-        //         hash: filteredHistory[selectedIndex]
-        //     });
-        // }
-        //
-        // close();
+    const handleClicked = useCallback((id: ClipboardItemId) => {
+        if (id) {
+            eventHandler.emit<RestoreClipboardHistoryEventData>(restoreClipboardHistoryEventName, {
+                id
+            });
+        }
+
+        close();
     }, [setSelectedIndex, filteredHistory]);
 
     return (
@@ -188,7 +202,7 @@ export default function ClipboardHistoryPage() {
                     />
                 </div>
                 <div className="bg-green-500 not-draggable row-span-1 col-span-1 overflow-y-auto overflow-x-hidden">
-                    <ClipboardList items={items} history={filteredHistory} selectedIndex={selectedIndex} onItemHover={handleHover} onItemClicked={handleClicked} />
+                    <ClipboardList items={itemToHistoryIdMap} history={filteredHistory} selectedIndex={selectedIndex} onItemHover={handleHover} onItemClicked={handleClicked} />
                 </div>
                 <div className="bg-pink-500 not-draggable row-span-1 col-span-1 overflow-y-auto overflow-x-hidden">
                     <ClipboardDetails item={selectedItem}/>

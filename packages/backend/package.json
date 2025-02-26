@@ -6,6 +6,7 @@
   "main": ".webpack/main",
   "scripts": {
     "dev": "nodemon",
+    "dev-reset": "npm run start --reset",
     "start": "APP_ENV=dev electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",

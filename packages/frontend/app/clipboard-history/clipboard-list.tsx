@@ -1,6 +1,7 @@
 import {
     ClipboardHistory,
-    ClipboardItem, ClipboardItemHash,
+    ClipboardItem,
+    ClipboardItemId,
     ClipboardItems,
 } from "@qlippy/common/src/settings/clipboard.settings.types";
 import {useEffect, useRef} from "react";
@@ -9,8 +10,8 @@ export type ClipboardListParams = {
     items: ClipboardItems,
     history: ClipboardHistory,
     selectedIndex: number,
-    onItemHover: (hash: ClipboardItemHash) => void,
-    onItemClicked: (hash: ClipboardItemHash) => void,
+    onItemHover: (id: ClipboardItemId) => void,
+    onItemClicked: (id: ClipboardItemId) => void,
 }
 
 export const ClipboardList = ({ items, history, selectedIndex, onItemHover, onItemClicked }: ClipboardListParams) => {
@@ -26,18 +27,18 @@ export const ClipboardList = ({ items, history, selectedIndex, onItemHover, onIt
 
     return (
         <ul>
-            {history.map((hash, index) => {
+            {history.map((id, index) => {
                 const isSelected = selectedIndex === index;
 
                 return (
                     <li
-                        key={hash}
+                        key={id}
                         className={`h-8 ${isSelected ? 'bg-red-500' : ''}`}
                         ref={isSelected ? selectedRef : null}
-                        onMouseEnter={() => onItemHover(hash)}
-                        onClick={() => onItemClicked(hash)}
+                        onMouseEnter={() => onItemHover(id)}
+                        onClick={() => onItemClicked(id)}
                     >
-                        <ClipboardListItem item={items[hash]} />
+                        <ClipboardListItem item={items[id]} />
                     </li>
                 )
             })}

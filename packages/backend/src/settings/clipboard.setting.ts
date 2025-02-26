@@ -1,8 +1,8 @@
 import {createSettings} from "./createSettings";
 import {
-    ClipboardItemHash,
     ClipboardSettings,
-    ClipboardItems, ClipboardItem
+    ClipboardItems,
+    ClipboardItemId
 } from "@qlippy/common/src/settings/clipboard.settings.types";
 import zlib from "node:zlib";
 import {Buffer} from "node:buffer";
@@ -27,32 +27,37 @@ const createSaveLoadFn = (name: 'compress' | 'decompress'): (data: ClipboardSett
     const compressDecompressFn = name === 'compress' ? compress : decompress;
 
     return async (settings) => {
-        const {clipboardItems} = settings;
+        const {items = {}} = settings;
 
         console.time(name);
 
         const compressedClipboardItems: ClipboardItems = {};
-        await Promise.all(Object.keys(clipboardItems).map(async (hash: ClipboardItemHash) => {
-            const item = clipboardItems[hash];
-            const { type } = item;
-            if (type === 'text' && item.metadata.length > 1000) {
-                compressedClipboardItems[hash] = {
-                    ...item,
-                    value: await compressDecompressFn(item.value),
-                };
-            } else if (type === 'html' && item.metadata.length > 1000) {
-                compressedClipboardItems[hash] = {
-                    ...item,
-                    value: await compressDecompressFn(item.value),
-                    metadata: {
-                        ...item.metadata,
-                        text: await compressDecompressFn(item.metadata.text),
+        try {
+            await Promise.all(Object.keys(items).map(async (id: ClipboardItemId) => {
+                const item = items[id];
+                const { type } = item;
+                if (type === 'text' && item.metadata.length > 1000) {
+                    compressedClipboardItems[id] = {
+                        ...item,
+                        value: await compressDecompressFn(item.value),
+                    };
+                } else if (type === 'html' && item.metadata.length > 1000) {
+                    compressedClipboardItems[id] = {
+                        ...item,
+                        value: await compressDecompressFn(item.value),
+                        metadata: {
+                            ...item.metadata,
+                            text: await compressDecompressFn(item.metadata.text),
+                        }
                     }
+                } else {
+                    compressedClipboardItems[id] = item;
                 }
-            } else {
-                compressedClipboardItems[hash] = item;
-            }
-        }));
+            }));
+        } catch (e) {
+            console.error('Failed to compress/decompress settings', e)
+        }
+
         console.timeEnd(name);
 
         return {
@@ -66,9 +71,8 @@ export const clipboardSettings = createSettings<ClipboardSettings>({
     name: 'clipboard',
     defaultSettings: {
         version: 1,
-        clipboardHistory: [],
-        clipboardItems: {},
+        history: [],
+        idToHashMap: {},
+        items: {},
     },
-    preSaveFn: createSaveLoadFn('compress'),
-    postLoadFn: createSaveLoadFn('decompress'),
 });
