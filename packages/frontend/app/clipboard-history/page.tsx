@@ -202,7 +202,12 @@ export default function ClipboardHistoryPage() {
                     />
                 </div>
                 <div className="row-span-1 col-span-1 overflow-y-auto overflow-x-hidden rounded-bl-lg">
-                    <ClipboardList items={itemToHistoryIdMap} history={filteredHistory} selectedIndex={selectedIndex} onItemHover={handleHover} onItemClicked={handleClicked} />
+                    <ClipboardList
+                        items={itemToHistoryIdMap}
+                        history={filteredHistory}
+                        selectedIndex={selectedIndex}
+                        onItemHover={handleHover}
+                        onItemClicked={handleClicked}/>
                 </div>
                 <div className="row-span-1 col-span-1 overflow-y-auto overflow-x-hidden">
                     <ClipboardDetails item={selectedItem}/>
