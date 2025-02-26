@@ -8,50 +8,55 @@ import {
 export const clipboardRestoreHandler = (() => {
     return {
         initialize: async () => {
-            eventHandler.listen<RestoreClipboardHistoryEventData>(restoreClipboardHistoryEventName, async ({hash}) => {
+            eventHandler.listen<RestoreClipboardHistoryEventData>(restoreClipboardHistoryEventName, async ({id}) => {
                 const settings = clipboardSettings.getSettings();
-                const {clipboardHistory, clipboardItems} = settings;
+                const {history, idToHashMap, items} = settings;
 
-                const [targetClipboardHistoryHash = undefined] = clipboardHistory.filter((itemHash) => itemHash === hash);
-                if (targetClipboardHistoryHash && targetClipboardHistoryHash in clipboardItems) {
-                    const clipboardItem = clipboardItems[targetClipboardHistoryHash];
-                    const {type} = clipboardItem;
-                    switch (type) {
-                        case 'url':
-                        case 'path': {
-                            const {metadata: { text }} = clipboardItem;
-                            clipboard.writeText(text, 'clipboard');
+                const [targetId = undefined] = history.filter((itemId) => itemId === id);
+                if (targetId) {
+                    const targetHash = idToHashMap[targetId];
+                    if (targetHash in items) {
+                        const clipboardItem = items[targetHash];
+
+                        // Remove from history
+                        const index = history.indexOf(id);
+                        if (index) history.splice(index, 1);
+
+                        await clipboardSettings.updateSettings({
+                            ...settings,
+                            history: history
+                        });
+
+                        const {type} = clipboardItem;
+                        switch (type) {
+                            case 'colour':
+                            case 'url':
+                            case 'path': {
+                                const {metadata: { text }} = clipboardItem;
+                                clipboard.writeText(text, 'clipboard');
+                            }
+                                break;
+                            case 'text': {
+                                const {value} = clipboardItem;
+                                clipboard.writeText(value, 'clipboard');
+                            }
+                                break;
+                            case 'html': {
+                                const {value, metadata: { text }} = clipboardItem;
+                                clipboard.write({
+                                    text,
+                                    html: value
+                                }, 'clipboard');
+                            }
+                                break;
+                            case 'image': {
+                                const {value} = clipboardItem;
+                                const imageNative = nativeImage.createFromDataURL(value);
+                                clipboard.writeImage(imageNative, 'clipboard');
+                            }
+                                break;
                         }
-                        break;
-                        case 'text': {
-                            const {value} = clipboardItem;
-                            clipboard.writeText(value, 'clipboard');
-                        }
-                            break;
-                        case 'html': {
-                            const {value} = clipboardItem;
-                            clipboard.writeText(value, 'clipboard');
-                        }
-                            break;
-                        case 'image': {
-                            const {value} = clipboardItem;
-                            const imageNative = nativeImage.createFromDataURL(value);
-                            clipboard.writeImage(imageNative, 'clipboard');
-                        }
-                            break;
                     }
-
-                    // Remove from history
-                    const index = clipboardHistory.indexOf(hash);
-                    if (index) clipboardHistory.splice(index, 1);
-
-                    // Add it to the front
-                    clipboardHistory.unshift(hash);
-
-                    await clipboardSettings.updateSettings({
-                        ...settings,
-                        clipboardHistory
-                    })
                 }
             });
         }

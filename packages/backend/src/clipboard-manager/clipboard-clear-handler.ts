@@ -8,35 +8,41 @@ import {
 export const clipboardClearHandler = (() => {
     return {
         initialize: async () => {
-            eventHandler.listen<ClearClipboardHistoryEventData>(clearClipboardHistoryEventName, async ({hashes}) => {
+            eventHandler.listen<ClearClipboardHistoryEventData>(clearClipboardHistoryEventName, async ({ids}) => {
                 const settings = clipboardSettings.getSettings();
-                const {clipboardHistory, clipboardItems} = settings;
+                const {history, idToHashMap, items} = settings;
 
-                if (hashes.length > 1) {
+                if (ids.length > 1) {
                     const {confirmed} = await confirmDialog.open({
                         title: 'Confirm',
-                        message: `You're about to remove ${hashes.length} items, are you sure?`,
+                        message: `You're about to remove ${ids.length} items, are you sure?`,
                     });
 
                     if (!confirmed) return; // Stop it
                 }
 
                 // Cleanup the history and items;
-                const {history, items} = hashes.reduce(({history, items}, hash) => {
+                const {historyNew, itemsNew} = ids.reduce(({historyNew, itemsNew}, id) => {
                     // Remove from history
-                    const index = history.indexOf(hash);
-                    if (index) history.splice(index, 1);
+                    const index = historyNew.indexOf(id);
+                    if (index) historyNew.splice(index, 1);
+
+                    // Only remove if there are no hash reference anymore
+                    const hash = idToHashMap[id];
+                    if (!Object.values(idToHashMap).includes(hash)) {
+                        delete itemsNew[hash];
+                    }
 
                     // remove from clipboard
-                    delete items[hash];
+                    delete idToHashMap[id];
 
-                    return {history, items}
-                }, { history: clipboardHistory, items: clipboardItems });
+                    return {historyNew, itemsNew}
+                }, { historyNew: history, itemsNew: items });
 
                 await clipboardSettings.updateSettings({
                     ...settings,
-                    clipboardHistory: history,
-                    clipboardItems: items
+                    history: historyNew,
+                    items: itemsNew
                 })
             });
         }
