@@ -10,11 +10,11 @@ export const clipboardRestoreHandler = (() => {
         initialize: async () => {
             eventHandler.listen<RestoreClipboardHistoryEventData>(restoreClipboardHistoryEventName, async ({id}) => {
                 const settings = clipboardSettings.getSettings();
-                const {history, idToHashMap, items} = settings;
+                const {history, historyIdToItemHash, items} = settings;
 
                 const [targetId = undefined] = history.filter((itemId) => itemId === id);
                 if (targetId) {
-                    const targetHash = idToHashMap[targetId];
+                    const targetHash = historyIdToItemHash[targetId];
                     if (targetHash in items) {
                         const clipboardItem = items[targetHash];
 

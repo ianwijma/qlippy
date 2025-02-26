@@ -1,8 +1,6 @@
 export type ClipboardType = 'image' | 'html' | 'path' | 'url' | 'colour' | 'text';
 export type ClipboardHash = string;
-export type ClipboardId = string;
 export type ClipboardBaseData = {
-    id: ClipboardId;
     value: string;
     hash: ClipboardHash;
 }

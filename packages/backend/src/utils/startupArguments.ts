@@ -1,6 +1,7 @@
 import YargsParser, {Arguments} from 'yargs-parser'
 
 type StartupArguments = Arguments & {
+    debug: boolean,
     dev: boolean,
     reset: boolean,
 }

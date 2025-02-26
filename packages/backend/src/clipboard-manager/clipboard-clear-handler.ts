@@ -10,7 +10,7 @@ export const clipboardClearHandler = (() => {
         initialize: async () => {
             eventHandler.listen<ClearClipboardHistoryEventData>(clearClipboardHistoryEventName, async ({ids}) => {
                 const settings = clipboardSettings.getSettings();
-                const {history, idToHashMap, items} = settings;
+                const {history, historyIdToItemHash, items} = settings;
 
                 if (ids.length > 1) {
                     const {confirmed} = await confirmDialog.open({
@@ -22,26 +22,29 @@ export const clipboardClearHandler = (() => {
                 }
 
                 // Cleanup the history and items;
-                const {historyNew, itemsNew} = ids.reduce(({historyNew, itemsNew}, id) => {
+                const {historyNew, idToHashMapNew, itemsNew} = ids.reduce(({historyNew, idToHashMapNew, itemsNew}, id) => {
                     // Remove from history
                     const index = historyNew.indexOf(id);
-                    if (index) historyNew.splice(index, 1);
+                    if (index !== -1) historyNew.splice(index, 1);
+
+                    // Grab the hash using the ID
+                    const hash = idToHashMapNew[id];
+
+                    // remove from id to hash map
+                    delete idToHashMapNew[id];
 
                     // Only remove if there are no hash reference anymore
-                    const hash = idToHashMap[id];
-                    if (!Object.values(idToHashMap).includes(hash)) {
+                    if (!Object.values(idToHashMapNew).includes(hash)) {
                         delete itemsNew[hash];
                     }
 
-                    // remove from clipboard
-                    delete idToHashMap[id];
-
-                    return {historyNew, itemsNew}
-                }, { historyNew: history, itemsNew: items });
+                    return {historyNew, idToHashMapNew, itemsNew}
+                }, { historyNew: history, idToHashMapNew: historyIdToItemHash, itemsNew: items });
 
                 await clipboardSettings.updateSettings({
                     ...settings,
                     history: historyNew,
+                    historyIdToItemHash: idToHashMapNew,
                     items: itemsNew
                 })
             });

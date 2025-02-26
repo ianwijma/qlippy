@@ -7,9 +7,9 @@ import {useCallback, useMemo, useState} from "react";
 import {ClipboardType} from "@qlippy/common/src/clipboard.types";
 import {useSettings} from "../../hooks/useSettings";
 import {
-    ClipboardHistory, ClipboardIdToHashMap,
+    ClipboardHistory, ClipboardHistoryIdToItemHash,
     ClipboardItem,
-    ClipboardItemId,
+    ClipboardHistoryId,
     ClipboardItems,
     ClipboardSettings
 } from "@qlippy/common/src/settings/clipboard.settings.types";
@@ -25,7 +25,7 @@ import {
 import {useWindowControls} from "../../hooks/useWindowControls";
 
 export type SearchableItem = {
-    id: ClipboardItemId,
+    id: ClipboardHistoryId,
     type: ClipboardType,
     text: string,
 }
@@ -37,25 +37,25 @@ export default function ClipboardHistoryPage() {
     const [selectedIndex, setSelectedIndex] = useState<number>(0);
     const {isLoading, settings} = useSettings<ClipboardSettings>('clipboard');
 
-    const {items, idToHashMap, history} = useMemo<{items: ClipboardItems, history: ClipboardHistory, idToHashMap: ClipboardIdToHashMap}>(() => ({
+    const {items, historyIdToItemHash, history} = useMemo<{items: ClipboardItems, history: ClipboardHistory, historyIdToItemHash: ClipboardHistoryIdToItemHash}>(() => ({
         items: isLoading ? {} : settings.items,
-        idToHashMap: isLoading ? {} as ClipboardIdToHashMap : settings.idToHashMap,
+        historyIdToItemHash: isLoading ? {} as ClipboardHistoryIdToItemHash : settings.historyIdToItemHash,
         history: isLoading ? [] as ClipboardHistory : settings.history,
     }), [isLoading, settings]);
 
     const selectedItem = useMemo<ClipboardItem>(() => {
         const id = history[selectedIndex];
-        const hash = idToHashMap[id];
+        const hash = historyIdToItemHash[id];
         return items[hash];
-    }, [selectedIndex, items, idToHashMap, history]);
+    }, [selectedIndex, items, historyIdToItemHash, history]);
 
-    const itemToHistoryIdMap = useMemo<{[key: ClipboardItemId]: ClipboardItem}>(() => {
+    const itemToHistoryIdMap = useMemo<{[key: ClipboardHistoryId]: ClipboardItem}>(() => {
         return history.reduce((acc, id) => {
-            const hash = idToHashMap[id];
+            const hash = historyIdToItemHash[id];
             acc[id] = items[hash];
             return acc
         }, {})
-    }, [items, idToHashMap, history])
+    }, [items, historyIdToItemHash, history])
 
     const updateQuery = useCallback((query: string) => {
         setQuery(query);
@@ -70,8 +70,8 @@ export default function ClipboardHistoryPage() {
     const searchQuery = useMemo(() => query.toLowerCase(), [query]);
 
     const searchableItems = useMemo<SearchableItem[]>(() => {
-        return history.map((id: ClipboardItemId) => {
-            const hash = idToHashMap[id];
+        return history.map((id: ClipboardHistoryId) => {
+            const hash = historyIdToItemHash[id];
             const item = items[hash] ?? undefined;
             if (item) {
                 const {type, value} = item;
@@ -108,7 +108,7 @@ export default function ClipboardHistoryPage() {
         }).filter(Boolean);
     }, [items, history]);
 
-    const filteredHistory = useMemo<ClipboardItemId[]>(() => {
+    const filteredHistory = useMemo<ClipboardHistoryId[]>(() => {
         const filtered = [];
 
         searchableItems.forEach(({ text, type, id }) => {
@@ -165,7 +165,7 @@ export default function ClipboardHistoryPage() {
 
     const handleClose = useCallback(() => close(), [close])
 
-    const handleHover = useCallback((id: ClipboardItemId) => {
+    const handleHover = useCallback((id: ClipboardHistoryId) => {
         const index = filteredHistory.indexOf(id);
 
         if (index >= 0 && index < filteredHistory.length) {
@@ -175,7 +175,7 @@ export default function ClipboardHistoryPage() {
         }
     }, [setSelectedIndex, filteredHistory]);
 
-    const handleClicked = useCallback((id: ClipboardItemId) => {
+    const handleClicked = useCallback((id: ClipboardHistoryId) => {
         if (id) {
             eventHandler.emit<RestoreClipboardHistoryEventData>(restoreClipboardHistoryEventName, {
                 id

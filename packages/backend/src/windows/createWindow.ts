@@ -1,13 +1,13 @@
 import {app, BrowserWindow, screen} from "electron";
 import path from "path";
 import {isDev} from "../utils/isDev";
-import {startupArguments} from "../utils/startupArguments";
 import {eventBus} from "../utils/eventBus";
 import {eventHandler} from "../utils/eventHandler";
 import {closeWindowEventName, type CloseWindowEventData} from '@qlippy/common/src/events/closeWindow.event';
 import {minimizeWindowEventName, type MinimizeWindowEventData} from '@qlippy/common/src/events/minimizeWindow.event';
 import {StopListening} from "@qlippy/common/src/eventbus.types";
 import {sleep} from "../utils/sleep";
+import {isDebug} from "../utils/isDebug";
 
 type UrlParams = Record<string, string>;
 
@@ -107,7 +107,7 @@ export const createWindow = ({
 
         window.hide();
 
-        if (isDev() || startupArguments.dev) closeDevTools();
+        if (isDebug()) closeDevTools();
 
         // Reset the window content.
         loadWindowPromise = loadWindow({urlParams: defaultUrlParams});
@@ -203,7 +203,7 @@ export const createWindow = ({
         }
 
         // Always trigger, ensure the dev tools are open
-        if (isDev() || startupArguments.dev) {
+        if (isDebug()) {
             await openDevTools();
 
             // Move the window in front of the devtools

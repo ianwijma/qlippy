@@ -1,7 +1,7 @@
 import {
     ClipboardHistory,
     ClipboardItem,
-    ClipboardItemId,
+    ClipboardHistoryId,
     ClipboardItems,
 } from "@qlippy/common/src/settings/clipboard.settings.types";
 import {useEffect, useRef} from "react";
@@ -10,8 +10,8 @@ export type ClipboardListParams = {
     items: ClipboardItems,
     history: ClipboardHistory,
     selectedIndex: number,
-    onItemHover: (id: ClipboardItemId) => void,
-    onItemClicked: (id: ClipboardItemId) => void,
+    onItemHover: (id: ClipboardHistoryId) => void,
+    onItemClicked: (id: ClipboardHistoryId) => void,
 }
 
 export const ClipboardList = ({ items, history, selectedIndex, onItemHover, onItemClicked }: ClipboardListParams) => {
