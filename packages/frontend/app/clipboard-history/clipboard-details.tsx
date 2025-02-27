@@ -11,7 +11,7 @@ export const ClipboardDetails = memo(({item}: ClipboardDetailsParams) => {
             <div className='h-3/5 overflow-auto bg-opacity-70 bg-white'>
                 <Details item={item} />
             </div>
-            <div className='h-2/5 not-draggable bg-opacity-70 bg-white rounded-br-lg'>
+            <div className='h-2/5 overflow-auto bg-opacity-70 bg-white rounded-br-lg'>
                 <Metadata item={item} />
             </div>
         </div>
@@ -22,7 +22,9 @@ const getMetadataFromType = (item: ClipboardItem) => {
     const {type, metadata, value} = item;
 
     const toDate = (dateMs: number): string => {
-        return new Date(dateMs * 1000).toISOString();
+        const date = new Date(dateMs);
+
+        return `${date.toLocaleDateString()} - ${date.toLocaleTimeString()}`;
     }
 
     function humanFileSize(bytes: number, useMetrics: boolean = false, rounding: number = 1) {
@@ -56,6 +58,7 @@ const getMetadataFromType = (item: ClipboardItem) => {
             return {
                 "Total characters": metadata.length,
                 "Text": metadata.text,
+                "Text total characters": metadata.textLength,
             };
         case "url":
             return {
@@ -113,13 +116,26 @@ const Metadata = ({ item }: MetadataProps) => {
     const metadata= getMetadataFromType(item);
 
     return (
-        <ul className='text-gray-500'>
+        <ul className='text-gray-500 ml-2'>
             {Object.keys(metadata).map(key => {
                 const value: string | any = metadata[key];
 
                 return (
                     <li key={key} className="truncate">
-                        {key}: {JSON.stringify(value)}
+                        {key}: {
+                        typeof value === 'string' ? value : (
+                            <ul className='ml-3'>
+                                {Object.keys(value).map((subKey: string) => {
+                                    const subValue = value[subKey];
+                                    return (
+                                        <li key={subKey}>
+                                            {key}: {subValue}
+                                        </li>
+                                    )
+                                })}
+                            </ul>
+                        )
+                    }
                     </li>
                 )
             })}
