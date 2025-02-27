@@ -52,16 +52,19 @@ const getMetadataFromType = (item: ClipboardItem) => {
     switch (type) {
         case "text":
             return {
+                'Type': 'text',
                 "Total characters": metadata.length
             };
         case "html":
             return {
+                'Type': 'HTML',
                 "Total characters": metadata.length,
                 "Text": metadata.text,
                 "Text total characters": metadata.textLength,
             };
         case "url":
             return {
+                'Type': 'URL',
                 "URL Length": metadata.length,
                 "URL username": metadata.username,
                 "URL password": metadata.password,
@@ -73,6 +76,7 @@ const getMetadataFromType = (item: ClipboardItem) => {
             };
         case "path": {
             const defaultFirstData = {
+                'Type': 'File path',
                 "Path": value,
                 "Path length": metadata.length,
             }
@@ -100,9 +104,12 @@ const getMetadataFromType = (item: ClipboardItem) => {
             };
         }
         case "colour":
-            return {};
+            return {
+                'Type': 'Colour',
+            };
         case "image":
             return {
+                'Type': 'Image',
                 'Image width': metadata.size.width,
                 'Image height': metadata.size.height,
             };
