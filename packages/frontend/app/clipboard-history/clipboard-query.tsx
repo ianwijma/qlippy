@@ -48,9 +48,50 @@ export const ClipboardQuery = memo(({
         }
     }, [selectNext, selectPrevious, confirmSelected, close, deleteSelected]);
 
+    const inputRef = useRef<HTMLInputElement>(null);
+    const selectRef = useRef<HTMLSelectElement>(null);
+
+    // Handle blur of the input element, where select is allowed to also have focus
+    useEffect(() => {
+        const inputEl = inputRef.current;
+        const selectEl = selectRef.current;
+
+        if (!inputRef || !selectRef) return;
+
+        type Focus = 'input' | 'select' | null;
+        let currentFocus: Focus = null;
+        const handleFocus = (name: Focus) => () => setTimeout(() => currentFocus = name, 10);
+        const handleBlur = () => {
+            currentFocus = null;
+
+            setTimeout(() => {
+                if (currentFocus === null) {
+                    inputEl.focus();
+                }
+            }, 20);
+        };
+
+        inputEl.addEventListener('focus', handleFocus('input'));
+        selectEl.addEventListener('focus', handleFocus('select'));
+        inputEl.addEventListener('blur', handleBlur);
+        selectEl.addEventListener('blur', handleBlur);
+
+        setTimeout(() => {
+            inputEl.focus()
+        }, 50);
+
+        return () => {
+            inputEl.removeEventListener('focus', handleFocus('input'));
+            selectEl.removeEventListener('focus', handleFocus('select'));
+            inputEl.removeEventListener('blur', handleBlur);
+            selectEl.removeEventListener('blur', handleBlur);
+        }
+    }, [inputRef, selectRef]);
+
     return (
         <div className="h-full flex gap-1 justify-between items-center">
             <input
+                ref={inputRef}
                 value={query}
                 onChange={(e) => updateQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
@@ -58,6 +99,7 @@ export const ClipboardQuery = memo(({
                 placeholder='Type to filter through entries...'
             />
             <select
+                ref={selectRef}
                 className='not-draggable bg-opacity-70 bg-white text-gray-500 w-1/5 h-full rounded-tr-lg'
                 value={typeFilter}
                 onChange={(e) => updateTypeFilter(e.target.value)}
