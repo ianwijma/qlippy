@@ -1,7 +1,7 @@
 import type {ForgeConfig} from '@electron-forge/shared-types';
 import {MakerSquirrel} from '@electron-forge/maker-squirrel';
-import {MakerZIP} from '@electron-forge/maker-zip';
 import {MakerDeb} from '@electron-forge/maker-deb';
+import MakerRpm from "@electron-forge/maker-rpm";
 import {AutoUnpackNativesPlugin} from '@electron-forge/plugin-auto-unpack-natives';
 import {WebpackPlugin} from '@electron-forge/plugin-webpack';
 import {FusesPlugin} from '@electron-forge/plugin-fuses';
@@ -9,18 +9,42 @@ import {FuseV1Options, FuseVersion} from '@electron/fuses';
 
 import {mainConfig} from './webpack.main.config';
 import {preloadConfig} from './webpack.preload.config';
+import MakerDMG from "@electron-forge/maker-dmg";
+
+const NAME = 'Qlippy';
+const DESCRIPTION = 'Qlip That!';
+const AUTHOR = 'Ian Wijma';
 
 const config: ForgeConfig = {
     packagerConfig: {
         asar: true,
     },
     rebuildConfig: {},
-    makers: [new MakerSquirrel({}), new MakerZIP({}, ['darwin']), /* new MakerRpm({}) ,*/ new MakerDeb({
-        options: {
-            name: 'Qlippy',
-            description: 'Qlip That!'
-        }
-    })],
+    makers: [
+        new MakerDeb({
+            options: {
+                name: NAME,
+                description: DESCRIPTION,
+                maintainer: AUTHOR,
+            }
+        }),
+        new MakerRpm({
+            options: {
+                name: NAME,
+                description: DESCRIPTION,
+            }
+        }),
+        new MakerSquirrel({
+            name: NAME,
+            description: DESCRIPTION,
+            authors: AUTHOR,
+            certificateFile: 'todo',
+            certificatePassword: 'TODO'
+        }),
+        new MakerDMG({
+            name: NAME,
+        })
+    ],
     plugins: [
         new AutoUnpackNativesPlugin({}),
         new WebpackPlugin({
