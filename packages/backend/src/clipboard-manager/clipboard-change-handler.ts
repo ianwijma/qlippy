@@ -27,7 +27,12 @@ export const clipboardChangeHandler = (() => {
                     historyIdToItemHash[historyId] = newItem.hash;
 
                     // Add the item to the clipboard itself
-                    items[newItem.hash] = newItem
+                    if (newItem.hash in items) {
+                        items[newItem.hash].dateTimeUpdated = Date.now();
+                    } else {
+                        items[newItem.hash] = newItem;
+                    }
+
 
                     // Check if we're over our hard limit;
                     while (history.length > CLIPBOARD_AMOUNT_LIMIT) {

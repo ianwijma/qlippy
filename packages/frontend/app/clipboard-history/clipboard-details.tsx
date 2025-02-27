@@ -19,7 +19,7 @@ export const ClipboardDetails = memo(({item}: ClipboardDetailsParams) => {
 })
 
 const getMetadataFromType = (item: ClipboardItem) => {
-    const {type, metadata, value} = item;
+    const {type, metadata, value, dateTimeCreated, dateTimeUpdated} = item;
 
     const toDate = (dateMs: number): string => {
         const date = new Date(dateMs);
@@ -49,11 +49,17 @@ const getMetadataFromType = (item: ClipboardItem) => {
         return bytes.toFixed(rounding) + ' ' + units[u];
     }
 
+    const baseData = {
+        'Copied first': toDate(dateTimeCreated),
+        'Copied last': toDate(dateTimeUpdated),
+    }
+
     switch (type) {
         case "text":
             return {
                 'Type': 'text',
-                "Total characters": metadata.length
+                "Total characters": metadata.length,
+                ...baseData,
             };
         case "html":
             return {
@@ -61,6 +67,7 @@ const getMetadataFromType = (item: ClipboardItem) => {
                 "Total characters": metadata.length,
                 "Text": metadata.text,
                 "Text total characters": metadata.textLength,
+                ...baseData,
             };
         case "url":
             return {
@@ -73,12 +80,14 @@ const getMetadataFromType = (item: ClipboardItem) => {
                 "Url path": metadata.pathname,
                 "Url hash": metadata.hash,
                 "Url query": metadata.searchParams,
+                ...baseData,
             };
         case "path": {
             const defaultFirstData = {
                 'Type': 'File path',
                 "Path": value,
                 "Path length": metadata.length,
+                ...baseData,
             }
 
             const defaultRestData = {
@@ -88,6 +97,7 @@ const getMetadataFromType = (item: ClipboardItem) => {
                 "Date last accessed": toDate(metadata.lastAccessedMs),
                 "Date last modified": toDate(metadata.lastModifiedMs),
                 "Date status changed": toDate(metadata.statusChangedMs),
+                ...baseData,
             }
 
             if (metadata.isFile) {
@@ -95,26 +105,33 @@ const getMetadataFromType = (item: ClipboardItem) => {
                     ...defaultFirstData,
                     'Size': humanFileSize(metadata.size),
                     ...defaultRestData,
+                    ...baseData,
                 }
             }
 
             return {
                 ...defaultFirstData,
                 ...defaultRestData,
+                ...baseData,
             };
         }
         case "colour":
             return {
                 'Type': 'Colour',
+                ...baseData,
             };
         case "image":
             return {
                 'Type': 'Image',
                 'Image width': metadata.size.width,
                 'Image height': metadata.size.height,
+                ...baseData,
             };
         default:
-            return metadata;
+            return {
+                ...(metadata as Object),
+                ...baseData,
+            };
     }
 }
 

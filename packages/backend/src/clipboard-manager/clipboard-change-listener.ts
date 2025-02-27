@@ -50,6 +50,11 @@ export const clipboardChangeListener = (() => {
     }
 
     const scanClipboard = async () => {
+        const baseData = {
+            dateTimeUpdated: Date.now(),
+            dateTimeCreated: Date.now(),
+        }
+
         // First we're getting the image, because HTML can contain the HTML version of an image.
         const image = clipboard.readImage('clipboard');
         if (!image.isEmpty()) {
@@ -72,6 +77,7 @@ export const clipboardChangeListener = (() => {
                     type: 'image',
                     value: fileStoragePath,
                     hash: imageHash,
+                    ...baseData,
                     metadata: {
                         aspectRadio: image.getAspectRatio(),
                         size: image.getSize(),
@@ -98,6 +104,7 @@ export const clipboardChangeListener = (() => {
                     type: 'colour',
                     value: colourText,
                     hash: colourTextHash,
+                    ...baseData,
                     metadata: {
                         text,
                         isHex,
@@ -124,6 +131,7 @@ export const clipboardChangeListener = (() => {
                     type: 'html',
                     value: html,
                     hash: htmlHash,
+                    ...baseData,
                     metadata: {
                         length: html.length,
                         text: htmlText,
@@ -148,6 +156,7 @@ export const clipboardChangeListener = (() => {
                     type: 'path',
                     value: path,
                     hash: pathHash,
+                    ...baseData,
                     metadata: {
                         text,
                         length: path.length,
@@ -192,6 +201,7 @@ export const clipboardChangeListener = (() => {
                     type: 'url',
                     value: urlString,
                     hash: urlStringHash,
+                    ...baseData,
                     metadata: {
                         text,
                         length: urlString.length,
@@ -225,6 +235,7 @@ export const clipboardChangeListener = (() => {
                     type: 'text',
                     value: text,
                     hash: textHash,
+                    ...baseData,
                     metadata: {
                         length: text.length
                     }

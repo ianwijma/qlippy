@@ -3,6 +3,8 @@ export type ClipboardHash = string;
 export type ClipboardBaseData = {
     value: string;
     hash: ClipboardHash;
+    dateTimeCreated: number;
+    dateTimeUpdated: number;
 }
 
 export type ImageClipboardData = ClipboardBaseData & {
