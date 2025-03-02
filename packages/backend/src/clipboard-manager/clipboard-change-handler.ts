@@ -2,7 +2,7 @@ import {clipboardSettings} from "../settings/clipboard.setting";
 import {ClipboardChangeEventEmitter} from "./clipboard-change-event-emitter";
 import {nanoid} from "nanoid";
 
-const CLIPBOARD_AMOUNT_LIMIT = 100;
+const CLIPBOARD_AMOUNT_LIMIT = 1000;
 
 export const clipboardChangeHandler = (() => {
     const emitter = new ClipboardChangeEventEmitter();
