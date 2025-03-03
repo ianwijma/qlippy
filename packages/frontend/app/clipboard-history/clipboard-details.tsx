@@ -186,7 +186,13 @@ const Details = ({ item }: DetailsProps) => {
         }
         case "url": {
             return (
-                <iframe src={value} frameBorder={0} className='w-full h-full pointer-events-none' />
+                <div className='w-full h-full'>
+                    <img
+                        src={`site://${value}`}
+                        alt='Clipboard url screenshot'
+                        className='w-full'
+                    />
+                </div>
             )
         }
         case "path": {
