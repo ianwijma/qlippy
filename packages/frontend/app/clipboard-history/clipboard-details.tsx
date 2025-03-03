@@ -153,7 +153,7 @@ const Metadata = ({ item }: MetadataProps) => {
                                     const subValue = value[subKey];
                                     return (
                                         <li key={subKey}>
-                                            {key}: {subValue}
+                                            {subKey}: {subValue}
                                         </li>
                                     )
                                 })}
