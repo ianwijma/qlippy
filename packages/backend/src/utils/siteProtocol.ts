@@ -11,7 +11,7 @@ export const siteProtocol = (() => {
 
     return {
         initialize: async () => {
-            const browser = await puppeteer.launch({ defaultViewport: { width: 1280, height: 720 }, timeout: 0 });
+            const browser = await puppeteer.launch({ defaultViewport: { width: 1280, height: 720 } });
 
             protocol.handle(protocolName, async (request) => {
                 try {
