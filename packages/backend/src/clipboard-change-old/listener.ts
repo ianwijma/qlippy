@@ -1,12 +1,19 @@
+// TODO: Migrate functionality to clipboard manager
+
 import {clipboard} from "electron";
 import fs from 'node:fs/promises'
 import type {Stats} from 'node:fs'
 import {createHash} from "node:crypto";
 import EventEmitter from "node:events";
-import {ClipboardData, ClipboardHash, ClipboardType} from "@qlippy/common/src/clipboard.types";
 import {fileExists, writeFile} from "../utils/files";
 import { join as pathJoin } from 'node:path'
 import {sleep} from "../utils/sleep";
+import {
+    ClipboardItemHash,
+    ClipboardItems,
+    ClipboardItemTypes
+} from "@qlippy/common/src/settings/clipboard.settings.types";
+import {nanoid} from "nanoid";
 
 const CLIPBOARD_CHECK_INTERVAL_MS = 250;
 
@@ -37,20 +44,21 @@ const sha1 = (input: any): string => {
 // Singleton instance that listens to clipboard changes.
 export const clipboardChangeListener = (() => {
     const eventEmitter = new EventEmitter();
-    const emit = (data: ClipboardData) => eventEmitter.emit<ClipboardData>('change', data)
+    const emit = (data: ClipboardItems) => eventEmitter.emit<ClipboardItems>('change', data)
 
     let isScanningClipboard: boolean = false;
 
-    const clipboardHashMap = new Map<ClipboardType, ClipboardHash>();
-    const updateHash = (name: ClipboardType, hash: ClipboardHash): void => {
+    const clipboardHashMap = new Map<ClipboardItemTypes, ClipboardItemHash>();
+    const updateHash = (name: ClipboardItemTypes, hash: ClipboardItemHash): void => {
         clipboardHashMap.set(name, hash);
     };
-    const isHashDifferent = (name: ClipboardType, hash: ClipboardHash): boolean => {
+    const isHashDifferent = (name: ClipboardItemTypes, hash: ClipboardItemHash): boolean => {
         return clipboardHashMap.get(name) !== hash;
     }
 
     const scanClipboard = async () => {
         const baseData = {
+            id: nanoid(),
             dateTimeUpdated: Date.now(),
             dateTimeCreated: Date.now(),
         }
@@ -63,8 +71,8 @@ export const clipboardChangeListener = (() => {
             const imageBitmap = image.getBitmap();
             const imageHash = sha1(imageBitmap);
 
-            if (isHashDifferent('image', imageHash)) {
-                updateHash('image', imageHash);
+            if (isHashDifferent(ClipboardItemTypes.image, imageHash)) {
+                updateHash(ClipboardItemTypes.image, imageHash);
 
                 const filePath = pathJoin(CLIPBOARD_STORAGE_PATH, `${imageHash}.png`);
                 let fileStoragePath = await fileExists(filePath);
@@ -74,7 +82,7 @@ export const clipboardChangeListener = (() => {
                 }
 
                 emit({
-                    type: 'image',
+                    type: ClipboardItemTypes.image,
                     value: fileStoragePath,
                     hash: imageHash,
                     ...baseData,
@@ -97,11 +105,11 @@ export const clipboardChangeListener = (() => {
         const isTransparentHex = HEX_COLOUR_TRANSPARENT_REGEX.test(colourText);
         if (isHex || isShortHex || isTransparentHex) {
             const colourTextHash = sha1(colourText);
-            if (isHashDifferent('text', colourTextHash)) {
-                updateHash('text', colourTextHash);
+            if (isHashDifferent(ClipboardItemTypes.colour, colourTextHash)) {
+                updateHash(ClipboardItemTypes.colour, colourTextHash);
 
                 emit({
-                    type: 'colour',
+                    type: ClipboardItemTypes.colour,
                     value: colourText,
                     hash: colourTextHash,
                     ...baseData,
@@ -121,14 +129,14 @@ export const clipboardChangeListener = (() => {
         const html = clipboard.readHTML('clipboard');
         if (html.trim() !== '') {
             const htmlHash = sha1(html);
-            if (isHashDifferent('html', htmlHash)) {
-                updateHash('html', htmlHash);
+            if (isHashDifferent(ClipboardItemTypes.html, htmlHash)) {
+                updateHash(ClipboardItemTypes.html, htmlHash);
 
                 // Getting the text extracted from the HTML;
                 const htmlText = clipboard.readText('clipboard');
 
                 emit({
-                    type: 'html',
+                    type: ClipboardItemTypes.html,
                     value: html,
                     hash: htmlHash,
                     ...baseData,
@@ -149,11 +157,11 @@ export const clipboardChangeListener = (() => {
         if (pathStats) {
             pathStats.atime
             const pathHash = sha1(path); // TODO: maybe change this to a sha1 from a file?
-            if (isHashDifferent('path', pathHash)) {
-                updateHash('path', pathHash)
+            if (isHashDifferent(ClipboardItemTypes.path, pathHash)) {
+                updateHash(ClipboardItemTypes.path, pathHash)
 
                 emit({
-                    type: 'path',
+                    type: ClipboardItemTypes.path,
                     value: path,
                     hash: pathHash,
                     ...baseData,
@@ -194,11 +202,11 @@ export const clipboardChangeListener = (() => {
         if (url) {
             const urlString = url.toString();
             const urlStringHash = sha1(urlString);
-            if (isHashDifferent('url', urlStringHash)) {
-                updateHash('url', urlStringHash);
+            if (isHashDifferent(ClipboardItemTypes.url, urlStringHash)) {
+                updateHash(ClipboardItemTypes.url, urlStringHash);
 
                 emit({
-                    type: 'url',
+                    type: ClipboardItemTypes.url,
                     value: urlString,
                     hash: urlStringHash,
                     ...baseData,
@@ -228,11 +236,11 @@ export const clipboardChangeListener = (() => {
         // Text check we're checking if is not empty.
         if (text.trim() !== '') {
             const textHash = sha1(text);
-            if (isHashDifferent('text', textHash)) {
-                updateHash('text', textHash);
+            if (isHashDifferent(ClipboardItemTypes.text, textHash)) {
+                updateHash(ClipboardItemTypes.text, textHash);
 
                 emit({
-                    type: 'text',
+                    type: ClipboardItemTypes.text,
                     value: text,
                     hash: textHash,
                     ...baseData,
@@ -263,6 +271,6 @@ export const clipboardChangeListener = (() => {
                 })().catch(console.error);
             }
         },
-        onChange: (callback: (data: ClipboardData) => void) => eventEmitter.on('change', callback)
+        onChange: (callback: (data: ClipboardItems) => void) => eventEmitter.on('change', callback)
     }
 })()

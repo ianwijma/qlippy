@@ -10,10 +10,10 @@ import {keyboardSettings} from "./settings/keyboard.setting";
 import {keyboardShortcuts} from "./utils/keyboard-shortcuts";
 import {clipboardSettings} from "./settings/clipboard.setting";
 import {clipboardHistoryWindow} from "./windows/clipboard-history.window";
-import {clipboardChangeHandler} from "./clipboard-manager/clipboard-change-handler";
-import {clipboardRestoreHandler} from "./clipboard-manager/clipboard-restore-handler";
-import {clipboardClearHandler} from "./clipboard-manager/clipboard-clear-handler";
-import {clipboardChangeListener} from "./clipboard-change/listener";
+import {clipboardChangeHandler} from "./clipboard-events/clipboard-change-handler";
+import {clipboardRestoreHandler} from "./clipboard-events/clipboard-restore-handler";
+import {clipboardClearHandler} from "./clipboard-events/clipboard-clear-handler";
+import {clipboardChangeListener} from "./clipboard-change-old/listener";
 import {fileProtocol} from "./utils/fileProtocol";
 import {siteProtocol} from "./utils/siteProtocol";
 

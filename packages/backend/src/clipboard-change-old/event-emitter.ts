@@ -1,26 +1,28 @@
+// TODO: Migrate functionality to clipboard manager
+
 import EventEmitter from "node:events";
 import {
     clipboardChangeListener,
 } from "./listener";
 import {
-    ClipboardData,
-    HtmlClipboardData,
-    ImageClipboardData,
-    PathClipboardData,
-    TextClipboardData,
-    UrlClipboardData
-} from "@qlippy/common/src/clipboard.types";
+    ClipboardItems,
+    HtmlClipboardItem,
+    ImageClipboardItem,
+    PathClipboardItem,
+    TextClipboardItem,
+    UrlClipboardItem
+} from "@qlippy/common/src/settings/clipboard.settings.types";
 
 interface ClipboardChangeEvents {
-    'image': (data: ImageClipboardData) => void,
-    'html': (data: HtmlClipboardData) => void,
-    'path': (data: PathClipboardData) => void,
-    'url': (data: UrlClipboardData) => void,
-    'colour': (data: UrlClipboardData) => void,
-    'text': (data: TextClipboardData) => void,
+    'image': (data: ImageClipboardItem) => void,
+    'html': (data: HtmlClipboardItem) => void,
+    'path': (data: PathClipboardItem) => void,
+    'url': (data: UrlClipboardItem) => void,
+    'colour': (data: UrlClipboardItem) => void,
+    'text': (data: TextClipboardItem) => void,
 
     // The * is triggers AFTER any specific event.
-    '*': (data: ClipboardData) => void,
+    '*': (data: ClipboardItems) => void,
 }
 
 export class ClipboardChangeEventEmitter extends EventEmitter  {

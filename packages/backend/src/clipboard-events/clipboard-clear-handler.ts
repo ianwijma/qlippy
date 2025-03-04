@@ -1,3 +1,5 @@
+// TODO: Migrate functionality to clipboard manager
+
 import {eventHandler} from "../utils/eventHandler";
 import {clipboardSettings} from "../settings/clipboard.setting";
 import {confirmDialog} from "../windows/dialog.window";

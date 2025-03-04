@@ -1,8 +1,8 @@
-import {ClipboardItem} from "@qlippy/common/src/settings/clipboard.settings.types";
+import {ClipboardItems, ClipboardItemTypes} from "@qlippy/common/src/settings/clipboard.settings.types";
 import {memo} from "react";
 import {HtmlFrame} from "../../components/htmlFrame";
 
-export type ClipboardDetailsParams = { item: ClipboardItem | undefined };
+export type ClipboardDetailsParams = { item: ClipboardItems | undefined };
 export const ClipboardDetails = memo(({item}: ClipboardDetailsParams) => {
     if (!item) return '';
 
@@ -18,8 +18,8 @@ export const ClipboardDetails = memo(({item}: ClipboardDetailsParams) => {
     )
 })
 
-const getMetadataFromType = (item: ClipboardItem) => {
-    const {type, metadata, value, dateTimeCreated, dateTimeUpdated} = item;
+const getMetadataFromType = (item: ClipboardItems) => {
+    const {type, dateTimeCreated, dateTimeUpdated} = item;
 
     const toDate = (dateMs: number): string => {
         const date = new Date(dateMs);
@@ -55,55 +55,55 @@ const getMetadataFromType = (item: ClipboardItem) => {
     }
 
     switch (type) {
-        case "text":
+        case ClipboardItemTypes.text:
             return {
                 'Type': 'text',
-                "Total characters": metadata.length,
+                "Total characters": item.length,
                 ...baseData,
             };
-        case "html":
+        case ClipboardItemTypes.html:
             return {
                 'Type': 'HTML',
-                "Total characters": metadata.length,
-                "Text": metadata.text,
-                "Text total characters": metadata.textLength,
+                "Total characters": item.length,
+                "Text": item.htmlText,
+                "Text total characters": item.htmlTextLength,
                 ...baseData,
             };
-        case "url":
+        case ClipboardItemTypes.url:
             return {
                 'Type': 'URL',
-                "URL Length": metadata.length,
-                "URL username": metadata.username,
-                "URL password": metadata.password,
-                "URL protocol": metadata.protocol,
-                "Url hostname": metadata.hostname,
-                "Url path": metadata.pathname,
-                "Url hash": metadata.hash,
-                "Url query": metadata.searchParams,
+                "URL Length": item.length,
+                "URL username": item.username,
+                "URL password": item.password,
+                "URL protocol": item.protocol,
+                "Url hostname": item.hostname,
+                "Url path": item.pathname,
+                "Url hash": item.hash,
+                "Url query": item.searchParams,
                 ...baseData,
             };
-        case "path": {
+        case ClipboardItemTypes.path: {
             const defaultFirstData = {
                 'Type': 'File path',
-                "Path": value,
-                "Path length": metadata.length,
+                "Path": item.path,
+                "Path length": item.length,
                 ...baseData,
             }
 
             const defaultRestData = {
-                "User ID": metadata.userId,
-                "Group ID": metadata.groupId,
-                "Date created": toDate(metadata.createdMs),
-                "Date last accessed": toDate(metadata.lastAccessedMs),
-                "Date last modified": toDate(metadata.lastModifiedMs),
-                "Date status changed": toDate(metadata.statusChangedMs),
+                "User ID": item.userId,
+                "Group ID": item.groupId,
+                "Date created": toDate(item.createdMs),
+                "Date last accessed": toDate(item.lastAccessedMs),
+                "Date last modified": toDate(item.lastModifiedMs),
+                "Date status changed": toDate(item.statusChangedMs),
                 ...baseData,
             }
 
-            if (metadata.isFile) {
+            if (item.isFile) {
                 return {
                     ...defaultFirstData,
-                    'Size': humanFileSize(metadata.size),
+                    'Size': humanFileSize(item.size),
                     ...defaultRestData,
                     ...baseData,
                 }
@@ -115,27 +115,28 @@ const getMetadataFromType = (item: ClipboardItem) => {
                 ...baseData,
             };
         }
-        case "colour":
+        case ClipboardItemTypes.colour:
             return {
                 'Type': 'Colour',
+                'Colour': item.colour,
                 ...baseData,
             };
-        case "image":
+        case ClipboardItemTypes.image:
             return {
                 'Type': 'Image',
-                'Image width': metadata.size.width,
-                'Image height': metadata.size.height,
+                'Image width': item.size.width,
+                'Image height': item.size.height,
                 ...baseData,
             };
         default:
             return {
-                ...(metadata as Object),
+                ...(item as Object),
                 ...baseData,
             };
     }
 }
 
-type MetadataProps = { item: ClipboardItem };
+type MetadataProps = { item: ClipboardItems };
 const Metadata = ({ item }: MetadataProps) => {
     const metadata= getMetadataFromType(item);
 
@@ -167,55 +168,55 @@ const Metadata = ({ item }: MetadataProps) => {
     )
 }
 
-type DetailsProps = { item: ClipboardItem };
+type DetailsProps = { item: ClipboardItems };
 const Details = ({ item }: DetailsProps) => {
-    const {type, value} = item;
+    const { type } = item;
 
     switch (type) {
-        case "text": {
+        case ClipboardItemTypes.text: {
             return (
                 <div>
-                    {value}
+                    {item.text}
                 </div>
             )
         }
-        case "html": {
+        case ClipboardItemTypes.html: {
             return (
-                <HtmlFrame>{value}</HtmlFrame>
+                <HtmlFrame>{item.html}</HtmlFrame>
             )
         }
-        case "url": {
+        case ClipboardItemTypes.url: {
             return (
                 <div className='w-full h-full'>
                     <img
-                        src={`site://${value}`}
+                        src={`site://${item.url}`}
                         alt='Clipboard url screenshot'
                         className='w-full'
                     />
                 </div>
             )
         }
-        case "path": {
+        case ClipboardItemTypes.path: {
             return (
                 <div>
-                    {value}
+                    {item.path}
                 </div>
             )
         }
-        case "colour": {
+        case ClipboardItemTypes.colour: {
             return (
-                <div style={{ backgroundColor: value }} className='w-full h-full'></div>
+                <div style={{ backgroundColor: item.colour }} className='w-full h-full'></div>
             )
         }
-        case "image": {
+        case ClipboardItemTypes.image: {
             return (
-                <img src={`app://${value}`} alt='Clipboard image' className='w-full h-full object-contain' />
+                <img src={`app://${item.imageFilePath}`} alt='Clipboard image' className='w-full h-full object-contain' />
             )
         }
         default: {
             return (
                 <div>
-                    {value}
+                    No preview available for {type}
                 </div>
             )
         }
