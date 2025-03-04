@@ -2,7 +2,7 @@ import 'zx/globals'
 
 echo`~~~ Cleaning up build files...`
 await Promise.allSettled([
-    $`rm -r packages/backend/.vite`,
+    $`rm -r packages/backend/.webpack`,
     $`rm -r packages/backend/out`,
     $`rm -r packages/frontend/.next`,
     $`rm -r packages/frontend/out`,
