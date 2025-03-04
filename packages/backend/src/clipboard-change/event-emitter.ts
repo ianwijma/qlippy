@@ -1,7 +1,7 @@
 import EventEmitter from "node:events";
 import {
     clipboardChangeListener,
-} from "./clipboard-change-listener";
+} from "./listener";
 import {
     ClipboardData,
     HtmlClipboardData,

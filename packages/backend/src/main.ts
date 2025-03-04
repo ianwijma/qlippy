@@ -13,7 +13,7 @@ import {clipboardHistoryWindow} from "./windows/clipboard-history.window";
 import {clipboardChangeHandler} from "./clipboard-manager/clipboard-change-handler";
 import {clipboardRestoreHandler} from "./clipboard-manager/clipboard-restore-handler";
 import {clipboardClearHandler} from "./clipboard-manager/clipboard-clear-handler";
-import {clipboardChangeListener} from "./clipboard-manager/clipboard-change-listener";
+import {clipboardChangeListener} from "./clipboard-change/listener";
 import {fileProtocol} from "./utils/fileProtocol";
 import {siteProtocol} from "./utils/siteProtocol";
 
