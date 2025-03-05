@@ -7,7 +7,7 @@ import {useCallback, useMemo, useState} from "react";
 import {useSettings} from "../../hooks/useSettings";
 import {
     ClipboardHistory,
-    ClipboardHistoryId,
+    ClipboardId,
     ClipboardItems,
     ClipboardItemTypes,
     ClipboardSettings
@@ -24,7 +24,7 @@ import {
 import {useWindowControls} from "../../hooks/useWindowControls";
 
 export type SearchableHistory = {
-    id: ClipboardHistoryId,
+    id: ClipboardId,
     type: ClipboardItemTypes,
     text: string,
     item: ClipboardItems,

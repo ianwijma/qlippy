@@ -1,0 +1,32 @@
+import puppeteer, {Browser} from "puppeteer";
+import {Buffer} from "node:buffer";
+
+const createScreenshotUrl = () => {
+    let browserCache: undefined | Browser;
+    const initializeBrowser = async (): Promise<Browser> => {
+        if (!browserCache) {
+            browserCache = await puppeteer.launch({ defaultViewport: { width: 1280, height: 720 } });
+        }
+
+        return browserCache;
+    };
+
+    return {
+        screenshot: async ({url, type}: {url: URL, type: 'png' | 'jpeg' | 'webp'}): Promise<Buffer> => {
+            const browser = await initializeBrowser();
+
+            const page = await browser.newPage();
+
+            page.goto(url.toString()).catch((err: Error) => console.error('Failed to redirect page', {err}));
+
+            await page.waitForNetworkIdle({idleTime: 250, timeout: 1000 * 10 /* ms > s */ });
+            const screenshot = await page.screenshot({fullPage: true, type});
+
+            page.close().catch((err: Error) => console.error('Failed to close the page', {err}));
+
+            return Buffer.from(screenshot);
+        }
+    }
+}
+
+export const screenshotUrl = createScreenshotUrl();

@@ -6,7 +6,5 @@ export const clipboardSettings = createSettings<ClipboardSettings>({
     defaultSettings: {
         version: 1,
         history: [],
-        historyIdToItemHash: {},
-        items: {},
     },
 });

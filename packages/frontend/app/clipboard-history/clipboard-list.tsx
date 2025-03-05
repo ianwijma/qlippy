@@ -50,50 +50,54 @@ type ClipboardListItemParams = {
 }
 
 const ClipboardListItem = ({item}: ClipboardListItemParams) => {
-    const {type, value, metadata} = item;
+    const {type} = item;
 
     switch (type) {
         case ClipboardItemTypes.text:
+            const {text} = item;
             return (
                 <div className="truncate" data-text>
-                    {value}
-                </div>
-            )
-        case ClipboardItemTypes.html:
-            const {text} = metadata
-            return (
-                <div className="truncate" data-html>
                     {text}
                 </div>
             )
+        case ClipboardItemTypes.html:
+            const {htmlText} = item;
+            return (
+                <div className="truncate" data-html>
+                    {htmlText}
+                </div>
+            )
         case ClipboardItemTypes.url:
+            const {url} = item;
             return (
                 <div className='truncate' data-url>
-                    {value}
+                    {url}
                 </div>
             )
         case ClipboardItemTypes.path:
+            const {path} = item;
             return (
                 <div className='truncate' data-path>
-                    {value}
+                    {path}
                 </div>
             )
         case ClipboardItemTypes.colour:
+            const {colour} = item;
             return (
                 <div className='truncate flex items-center gap-1' data-colour>
-                    <span style={{ backgroundColor: value }} className="w-8 h-8" /> {value}
+                    <span style={{ backgroundColor: colour }} className="w-8 h-8" /> {colour}
                 </div>
             )
         case ClipboardItemTypes.image:
+            const {imageFilePath} = item;
             return (
                 <div className='truncate flex items-center gap-1 h-full' data-image>
-                    <span>Image:</span> <img className='h-full max-w-[75%]' src={`app://${value}`} alt='Clipboard image content'/>
-                </div>
-            )
-        default:
-            return (
-                <div className="truncate" data-default>
-                    {value}
+                    <span>Image:</span>
+                    {
+                        imageFilePath
+                            ? <img className='h-full max-w-[75%]' src={`app://${imageFilePath}`} alt='Clipboard image content'/>
+                            : ''
+                    }
                 </div>
             )
     }

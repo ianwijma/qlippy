@@ -1,7 +1,7 @@
 import {BaseSettings} from "../settings.types";
 
 export type ClipboardItemHash = string;
-export type ClipboardHistoryId = string;
+export type ClipboardId = string;
 export enum ClipboardItemTypes {
     image = 'image',
     html = 'html',
@@ -13,10 +13,7 @@ export enum ClipboardItemTypes {
 
 export type ClipboardBaseItem = {
     // The items ID
-    id: ClipboardHistoryId,
-
-    // The items type affects additional fields
-    type: ClipboardItemTypes,
+    id: ClipboardId,
 
     // The items unique hash
     hash: ClipboardItemHash;
@@ -24,10 +21,6 @@ export type ClipboardBaseItem = {
     // Created and updated fields
     dateTimeCreated: number;
     dateTimeUpdated: number;
-}
-
-export type ClipboardTextBase = {
-    textFilePath?: string;
 }
 
 export type ClipboardImageBase = {
