@@ -2,16 +2,15 @@ import {NativeImage} from "electron";
 import {
     ClipboardBaseItem,
     ClipboardItemHash,
-    ClipboardItemTypes,
     ColourClipboardItem,
     HtmlClipboardItem,
     ImageClipboardItem,
-    PathClipboardItem, TextClipboardItem,
+    PathClipboardItem,
+    TextClipboardItem,
     UrlClipboardItem
 } from "@qlippy/common/src/settings/clipboard.settings.types";
 import {nanoid} from "nanoid";
 import type {Stats} from "node:fs";
-import {UNSAFE_fileExists} from "../utils/files";
 
 type GetBaseProps = {
     hash: ClipboardItemHash
@@ -56,7 +55,7 @@ export const isTextAColour = (text: string) => {
 export const textToColourClipboardItem = ({text, hash}: ConverterType<{text: string}>): ColourClipboardItem => {
     const colour = text.trim();
     return {
-        type: ClipboardItemTypes.colour,
+        type: 'colour',
         colour,
         ...getBase({ hash }),
         isHex: HEX_COLOUR_REGEX.test(colour),
@@ -67,7 +66,7 @@ export const textToColourClipboardItem = ({text, hash}: ConverterType<{text: str
 
 export const htmlToHtmlClipboardItem = ({html, htmlText, hash}: ConverterType<{html: string, htmlText: string}>): HtmlClipboardItem => {
     return {
-        type: ClipboardItemTypes.html,
+        type: 'html',
         html,
         ...getBase({ hash }),
         length: html.length,
@@ -79,7 +78,7 @@ export const htmlToHtmlClipboardItem = ({html, htmlText, hash}: ConverterType<{h
 export const textToPathClipboardItem = ({ text, stats, hash }: ConverterType<{ text: string, stats: Stats }>): PathClipboardItem => {
     const path = text.trim();
     return {
-        type: ClipboardItemTypes.path,
+        type: 'path',
         path,
         ...getBase({ hash }),
         length: path.length,
@@ -119,7 +118,7 @@ export const isTextAUrl = (text: string): URL | false => {
 export const textToUrlClipboardItem = ({text, url, hash}: ConverterType<{text: string, url: URL}>): UrlClipboardItem => {
     const urlString = text.trim();
     return {
-        type: ClipboardItemTypes.url,
+        type: 'url',
         url: urlString,
         imageFilePath: undefined,
         ...getBase({ hash }),

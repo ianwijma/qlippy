@@ -1,5 +1,8 @@
 import {clipboardChangeEmitter} from "./change-emitter";
-import {ClipboardItemHash, ClipboardItemTypes} from "@qlippy/common/src/settings/clipboard.settings.types";
+import {
+    ClipboardItemHash,
+    ClipboardItemTypes,
+} from "@qlippy/common/src/settings/clipboard.settings.types";
 import {
     htmlToHtmlClipboardItem,
     isTextAColour,
@@ -32,8 +35,8 @@ const createClipboardHandleChange = () => {
                 const {image, imageHash, isImageEmpty} = data;
 
                 // First we're getting the image, because HTML can contain the HTML version of an image.
-                if (!isImageEmpty && isHashDifferent(ClipboardItemTypes.image, imageHash)) {
-                    updateHash(ClipboardItemTypes.image, imageHash);
+                if (!isImageEmpty && isHashDifferent('image', imageHash)) {
+                    updateHash('image', imageHash);
 
                     const item = nativeImageToImageClipboardItem({ image, hash: imageHash });
                     await clipboardManager.add(item);
@@ -53,8 +56,8 @@ const createClipboardHandleChange = () => {
                 const {text, textHash, isTextEmpty} = data;
 
                 // We're getting the text, for colour checking, as some colours are copied from an IDE, which involves HTML, we need to first check for colours.
-                if (!isTextEmpty && isTextAColour(text) && isHashDifferent(ClipboardItemTypes.colour, textHash)) {
-                    updateHash(ClipboardItemTypes.colour, textHash);
+                if (!isTextEmpty && isTextAColour(text) && isHashDifferent('colour', textHash)) {
+                    updateHash('colour', textHash);
 
                     const item = textToColourClipboardItem({ text, hash: textHash });
                     await clipboardManager.add(item);
@@ -65,8 +68,8 @@ const createClipboardHandleChange = () => {
                 const { html, htmlHash, isHtmlEmpty } = data;
 
                 // We're getting the HTML, as HTML also contains the text in the HTML.
-                if (isHtmlEmpty && isHashDifferent(ClipboardItemTypes.html, htmlHash)) {
-                    updateHash(ClipboardItemTypes.html, htmlHash);
+                if (isHtmlEmpty && isHashDifferent('html', htmlHash)) {
+                    updateHash('html', htmlHash);
 
                     const item = htmlToHtmlClipboardItem({ html, htmlText: text, hash: htmlHash });
                     await clipboardManager.add(item);
@@ -76,8 +79,8 @@ const createClipboardHandleChange = () => {
 
                 // Text check we're checking if it contains a local path.
                 const stats = await UNSAFE_fileStats(text.trim());
-                if (isTextEmpty && stats && isHashDifferent(ClipboardItemTypes.path, textHash)) {
-                    updateHash(ClipboardItemTypes.path, textHash);
+                if (isTextEmpty && stats && isHashDifferent('path', textHash)) {
+                    updateHash('path', textHash);
 
                     const item = textToPathClipboardItem({ text, stats, hash: textHash });
                     await clipboardManager.add(item);
@@ -87,8 +90,8 @@ const createClipboardHandleChange = () => {
 
                 // Text check we're checking if it contains a valid URL.
                 const url = isTextAUrl(text.trim());
-                if (isTextEmpty && url && isHashDifferent(ClipboardItemTypes.url, textHash)) {
-                    updateHash(ClipboardItemTypes.path, textHash);
+                if (isTextEmpty && url && isHashDifferent('url', textHash)) {
+                    updateHash('path', textHash);
 
                     const item = textToUrlClipboardItem({ text, url, hash: textHash });
                     await clipboardManager.add(item);
@@ -106,8 +109,8 @@ const createClipboardHandleChange = () => {
                 }
 
                 // Text check we're checking if is not empty.
-                if (isTextEmpty && isHashDifferent(ClipboardItemTypes.text, textHash)) {
-                    updateHash(ClipboardItemTypes.text, textHash);
+                if (isTextEmpty && isHashDifferent('text', textHash)) {
+                    updateHash('text', textHash);
 
                     const item = textToTextClipboardItem({ text, hash: textHash });
                     await clipboardManager.add(item);

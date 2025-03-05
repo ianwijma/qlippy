@@ -55,13 +55,13 @@ const getMetadataFromType = (item: ClipboardItems) => {
     }
 
     switch (type) {
-        case ClipboardItemTypes.text:
+        case 'text':
             return {
                 'Type': 'text',
                 "Total characters": item.length,
                 ...baseData,
             };
-        case ClipboardItemTypes.html:
+        case 'html':
             return {
                 'Type': 'HTML',
                 "Total characters": item.length,
@@ -69,7 +69,7 @@ const getMetadataFromType = (item: ClipboardItems) => {
                 "Text total characters": item.htmlTextLength,
                 ...baseData,
             };
-        case ClipboardItemTypes.url:
+        case 'url':
             return {
                 'Type': 'URL',
                 "URL Length": item.length,
@@ -82,7 +82,7 @@ const getMetadataFromType = (item: ClipboardItems) => {
                 "Url query": item.searchParams,
                 ...baseData,
             };
-        case ClipboardItemTypes.path: {
+        case 'path': {
             const defaultFirstData = {
                 'Type': 'File path',
                 "Path": item.path,
@@ -115,13 +115,13 @@ const getMetadataFromType = (item: ClipboardItems) => {
                 ...baseData,
             };
         }
-        case ClipboardItemTypes.colour:
+        case 'colour':
             return {
                 'Type': 'Colour',
                 'Colour': item.colour,
                 ...baseData,
             };
-        case ClipboardItemTypes.image:
+        case 'image':
             return {
                 'Type': 'Image',
                 'Image width': item.size.width,
@@ -173,19 +173,19 @@ const Details = ({ item }: DetailsProps) => {
     const { type } = item;
 
     switch (type) {
-        case ClipboardItemTypes.text: {
+        case 'text': {
             return (
                 <div>
                     {item.text}
                 </div>
             )
         }
-        case ClipboardItemTypes.html: {
+        case 'html': {
             return (
                 <HtmlFrame>{item.html}</HtmlFrame>
             )
         }
-        case ClipboardItemTypes.url: {
+        case 'url': {
             const {imageFilePath} = item;
             if (imageFilePath) {
                 return (
@@ -205,19 +205,19 @@ const Details = ({ item }: DetailsProps) => {
                 </div>
             )
         }
-        case ClipboardItemTypes.path: {
+        case 'path': {
             return (
                 <div>
                     {item.path}
                 </div>
             )
         }
-        case ClipboardItemTypes.colour: {
+        case 'colour': {
             return (
                 <div style={{ backgroundColor: item.colour }} className='w-full h-full'></div>
             )
         }
-        case ClipboardItemTypes.image: {
+        case 'image': {
             const {imageFilePath} = item;
             if (imageFilePath) {
                 return (

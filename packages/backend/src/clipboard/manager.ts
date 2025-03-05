@@ -1,7 +1,6 @@
 import {
     ClipboardId,
     ClipboardItems,
-    ClipboardItemTypes
 } from '@qlippy/common/src/settings/clipboard.settings.types'
 import {clipboardSettings} from "../settings/clipboard.setting";
 import {readFile, removeFile} from "../utils/files";
@@ -13,7 +12,7 @@ const createClipboardManager = () => {
     const removeItemFromHistory = async ({item, history}: {item: ClipboardItems, history: ClipboardItems[]}): Promise<ClipboardItems[]> => {
         // Check if there are any files we need to remove.
         const {type} = item;
-        if (type === ClipboardItemTypes.image || type === ClipboardItemTypes.url) {
+        if (type === 'image' || type === 'url') {
             const {imageFilePath} = item;
 
             if (imageFilePath) {
@@ -101,6 +100,21 @@ const createClipboardManager = () => {
                 history: updatedHistory,
             });
         },
+        removeAll: async (): Promise<void> => {
+            const settings = clipboardSettings.getSettings();
+            const {history} = settings;
+
+            let updatedHistory = history;
+            for (const item of history) {
+                updatedHistory = await removeItemFromHistory({ item, history })
+            }
+
+            // Update the history.
+            await clipboardSettings.updateSettings({
+                ...settings,
+                history: updatedHistory,
+            });
+        },
         restore: async (itemToRestore: ClipboardItems): Promise<void> => {
             const settings = clipboardSettings.getSettings();
             const {history} = settings;
@@ -115,29 +129,29 @@ const createClipboardManager = () => {
 
                 const {type} = itemToRestore;
                 switch (type) {
-                    case ClipboardItemTypes.image: {
+                    case 'image': {
                         const {imageFilePath} = itemToRestore;
                         const imageBuffer = await readFile(imageFilePath);
                         const image = nativeImage.createFromBuffer(imageBuffer);
                         clipboard.writeImage(image, 'clipboard');
                         break;
                     }
-                    case ClipboardItemTypes.url: {
+                    case 'url': {
                         const {url} = itemToRestore;
                         clipboard.writeText(url, 'clipboard');
                         break;
                     }
-                    case ClipboardItemTypes.path: {
+                    case 'path': {
                         const {path} = itemToRestore;
                         clipboard.writeText(path, 'clipboard');
                         break;
                     }
-                    case ClipboardItemTypes.colour: {
+                    case 'colour': {
                         const {colour} = itemToRestore;
                         clipboard.writeText(colour, 'clipboard');
                         break;
                     }
-                    case ClipboardItemTypes.html: {
+                    case 'html': {
                         const {html, htmlText} = itemToRestore;
                         clipboard.write({
                             html,
@@ -145,7 +159,7 @@ const createClipboardManager = () => {
                         }, 'clipboard');
                         break;
                     }
-                    case ClipboardItemTypes.text: {
+                    case 'text': {
                         const {text} = itemToRestore;
                         clipboard.writeText(text, 'clipboard');
                         break;

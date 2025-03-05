@@ -47,29 +47,29 @@ export default function ClipboardHistoryPage() {
 
             const base = { id, type, item };
             switch (type) {
-                case ClipboardItemTypes.text: return {
+                case 'text': return {
                     ...base,
                     text: item.text.toString(),
                 };
-                case ClipboardItemTypes.colour: return {
+                case 'colour': return {
                     ...base,
                     text: item.colour.toLowerCase(),
                 }
-                case ClipboardItemTypes.html: return {
+                case 'html': return {
                     ...base,
                     text: item.htmlText.toLowerCase(),
                 }
-                case ClipboardItemTypes.url: return {
+                case 'url': return {
                     ...base,
                     text: item.url.toLowerCase(),
                 }
-                case ClipboardItemTypes.path: {
+                case 'path': {
                     return {
                         ...base,
                         text: item.path.toLowerCase(),
                     }
                 }
-                case ClipboardItemTypes.image: return {
+                case 'image': return {
                     ...base,
                     text: `image`
                 }

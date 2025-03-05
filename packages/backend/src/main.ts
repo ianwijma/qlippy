@@ -13,6 +13,8 @@ import {fileProtocol} from "./utils/fileProtocol";
 import {clipboardHandleChange} from "./clipboard/handle-change";
 import {clipboardHandleClear} from "./clipboard/handle-clear";
 import {clipboardHandleRestore} from "./clipboard/handle-restore";
+import {clipboardChangeEmitter} from "./clipboard/change-emitter";
+import {clipboardSettings} from "./settings/clipboard.setting";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -34,12 +36,14 @@ if (!isSingleInstance) {
     const onReady = async () => {
         // Settings
         await keyboardSettings.initialize();
+        await clipboardSettings.initialize();
 
         if (startupArguments.reset) {
             await resetAllSettings();
         }
 
         // Setup Clipboard Change Processes
+        await clipboardChangeEmitter.initialize();
         await clipboardHandleChange.initialize();
         await clipboardHandleClear.initialize();
         await clipboardHandleRestore.initialize();

@@ -2,14 +2,7 @@ import {BaseSettings} from "../settings.types";
 
 export type ClipboardItemHash = string;
 export type ClipboardId = string;
-export enum ClipboardItemTypes {
-    image = 'image',
-    html = 'html',
-    path = 'path',
-    url = 'url',
-    colour = 'colour',
-    text = 'text',
-}
+export type ClipboardItemTypes = 'image' | 'html' | 'path' | 'url' | 'colour' | 'text'
 
 export type ClipboardBaseItem = {
     // The items ID
@@ -28,7 +21,7 @@ export type ClipboardImageBase = {
 }
 
 export type ImageClipboardItem = ClipboardBaseItem & ClipboardImageBase & {
-    type: ClipboardItemTypes.image;
+    type: 'image';
     aspectRadio: number;
     size: {
         width: number;
@@ -37,7 +30,7 @@ export type ImageClipboardItem = ClipboardBaseItem & ClipboardImageBase & {
 }
 
 export type HtmlClipboardItem = ClipboardBaseItem & {
-    type: ClipboardItemTypes.html;
+    type: 'html';
     html: string;
     length: number;
     htmlText: string;
@@ -45,7 +38,7 @@ export type HtmlClipboardItem = ClipboardBaseItem & {
 }
 
 export type PathClipboardItem = ClipboardBaseItem & {
-    type: ClipboardItemTypes.path;
+    type: 'path';
     path: string;
     length: number;
     isBlockDevice: boolean;
@@ -72,7 +65,7 @@ export type PathClipboardItem = ClipboardBaseItem & {
 }
 
 export type UrlClipboardItem = ClipboardBaseItem & ClipboardImageBase & {
-    type: ClipboardItemTypes.url;
+    type: 'url';
     url: string;
     length: number;
     hash: string;
@@ -90,7 +83,7 @@ export type UrlClipboardItem = ClipboardBaseItem & ClipboardImageBase & {
 }
 
 export type ColourClipboardItem = ClipboardBaseItem & {
-    type: ClipboardItemTypes.colour;
+    type: 'colour';
     colour: string;
     isHex: boolean;
     isShortHex: boolean;
@@ -98,7 +91,7 @@ export type ColourClipboardItem = ClipboardBaseItem & {
 }
 
 export type TextClipboardItem = ClipboardBaseItem & {
-    type: ClipboardItemTypes.text;
+    type: 'text';
     text: string;
     length: number;
 }

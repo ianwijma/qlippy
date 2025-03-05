@@ -3,7 +3,7 @@ import {clipboard, NativeImage} from 'electron'
 import {sleep} from "../utils/sleep";
 import {sha1} from "../utils/crypto";
 
-const CLIPBOARD_CHECK_INTERVAL_MS = 250;
+const CLIPBOARD_CHECK_INTERVAL_MS = 2500; // TODO: change back to 250
 
 type ClipboardChangeTypes = 'image' | 'html' | 'text';
 
@@ -44,15 +44,7 @@ const createClipboardChangeEmitter = () => {
     const eventEmitter = new EventEmitter();
     const emit = (data: ClipboardChangeData) => eventEmitter.emit('change', data);
 
-    const {imageHash: initialImageHash} = getClipboardImage();
-    const {htmlHash: initialHtmlHash} = getClipboardHtml();
-    const {textHash: initialTextHash} = getClipboardText();
-
     const hashMap = new Map<ClipboardChangeTypes, string>();
-
-    hashMap.set('image', initialImageHash);
-    hashMap.set('html', initialHtmlHash);
-    hashMap.set('text', initialTextHash);
 
     const scanClipboard = async () => {
         const {isImageEmpty, imageHash, image} = getClipboardImage();
@@ -64,6 +56,10 @@ const createClipboardChangeEmitter = () => {
         const hasTextChanged = isTextEmpty && textHash !== hashMap.get('text');
 
         if (hasImageChanged || hasHtmlChanged || hasTextChanged) {
+            hashMap.set('image', imageHash);
+            hashMap.set('html', textHash);
+            hashMap.set('text', textHash);
+
             emit({
                 image, imageHash, isImageEmpty,
                 html, htmlHash, isHtmlEmpty,
@@ -74,20 +70,29 @@ const createClipboardChangeEmitter = () => {
 
     let listening = false;
 
-    // Async, so it does not block the main thread and freezes the whole application... LOL
-    (async () => {
-        if (!listening) {
-            listening = true;
-
-            while (listening) {
-                await scanClipboard();
-
-                await sleep(CLIPBOARD_CHECK_INTERVAL_MS);
-            }
-        }
-    })().catch(console.error); // Pleasing TS
-
     return {
+        initialize: async (): Promise<void> => {
+            const {imageHash: initialImageHash} = getClipboardImage();
+            const {htmlHash: initialHtmlHash} = getClipboardHtml();
+            const {textHash: initialTextHash} = getClipboardText();
+
+            hashMap.set('image', initialImageHash);
+            hashMap.set('html', initialHtmlHash);
+            hashMap.set('text', initialTextHash);
+
+            // Async, so it does not block the main thread and freezes the whole application... LOL
+            (async () => {
+                if (!listening) {
+                    listening = true;
+
+                    while (listening) {
+                        await scanClipboard();
+
+                        await sleep(CLIPBOARD_CHECK_INTERVAL_MS);
+                    }
+                }
+            })().catch(console.error); // Pleasing TS
+        },
         onChange: (callback: (data: ClipboardChangeData) => void) => eventEmitter.on('change', callback)
     }
 }

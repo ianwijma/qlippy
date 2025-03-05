@@ -20,6 +20,7 @@ type ResponseObject<T extends SimpleEventBusData = SimpleEventBusData> = {
     requestId: string;
     success?: boolean;
     data?: T;
+    errorMessage?: string;
 }
 
 const ENABLE_LOG = false;
@@ -40,7 +41,7 @@ export const createResponseHandler = (eventHandler: EventHandler): ResponseHandl
                 const stopListening = eventHandler.listen<ResponseObject<RES>>(RESPONSE_NAME, (response) => {
                     log('responseHandler - requestResponse - listen', requestName, response);
 
-                    const {requestId: currentRequestId, data: responseData, success} = response;
+                    const {requestId: currentRequestId, data: responseData, success, errorMessage} = response;
 
                     if (currentRequestId === requestId) {
                         stopListening();
@@ -49,7 +50,7 @@ export const createResponseHandler = (eventHandler: EventHandler): ResponseHandl
                             // @ts-expect-error - IDK why TS is sad, the data is of correct type...
                             resolve(responseData);
                         } else {
-                            reject('ResponseHandler - fetch failure');
+                            reject(`ResponseHandler - fetch failure: ${errorMessage}`);
                         }
 
                         done = true;
@@ -91,9 +92,12 @@ export const createResponseHandler = (eventHandler: EventHandler): ResponseHandl
                             data: responseData,
                         });
                     } catch (error) {
+                        console.log('responseHandler - error', error);
+
                         eventHandler.emit<ResponseObject<RES>>(RESPONSE_NAME, {
                             requestId,
                             success: false,
+                            errorMessage: error.message
                         });
                     }
                 }
