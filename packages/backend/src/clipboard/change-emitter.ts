@@ -56,13 +56,6 @@ const createClipboardChangeEmitter = () => {
         const hasTextChanged = !isTextEmpty && textHash !== hashMap.get('text');
 
         if (hasImageChanged || hasHtmlChanged || hasTextChanged) {
-            console.log('change', { hasImageChanged, hasHtmlChanged, hasTextChanged });
-            console.log('emit', {
-                image, imageHash, isImageEmpty,
-                html, htmlHash, isHtmlEmpty,
-                text, textHash, isTextEmpty,
-            });
-
             if (hasImageChanged) hashMap.set('image', imageHash);
             if (hasHtmlChanged) hashMap.set('html', htmlHash);
             if (hasTextChanged) hashMap.set('text', textHash);
