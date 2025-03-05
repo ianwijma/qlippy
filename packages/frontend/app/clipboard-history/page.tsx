@@ -78,7 +78,7 @@ export default function ClipboardHistoryPage() {
                     return undefined;
             }
         }).filter(Boolean);
-    }, []);
+    }, [history]);
 
     const updateQuery = useCallback((query: string) => {
         setQuery(query);
@@ -105,7 +105,7 @@ export default function ClipboardHistoryPage() {
 
     const filteredItems = useMemo<ClipboardItems[]>(
         () => filteredHistory.map(({item}) => item),
-        [searchableHistory]
+        [filteredHistory]
     );
 
     const selectedItem = useMemo<ClipboardItems | undefined>(

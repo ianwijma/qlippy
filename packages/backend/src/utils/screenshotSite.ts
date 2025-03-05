@@ -19,7 +19,12 @@ const createScreenshotUrl = () => {
 
             page.goto(url.toString()).catch((err: Error) => console.error('Failed to redirect page', {err}));
 
-            await page.waitForNetworkIdle({idleTime: 250, timeout: 1000 * 10 /* ms > s */ });
+            try {
+                await page.waitForNetworkIdle({idleTime: 250, timeout: 1000 * 10 /* ms > s */ });
+            } catch (error) {
+                console.error('Screenshot timed out', {error});
+            }
+
             const screenshot = await page.screenshot({fullPage: true, type});
 
             page.close().catch((err: Error) => console.error('Failed to close the page', {err}));

@@ -37,7 +37,7 @@ const createClipboardManager = () => {
             const [firstItem = undefined] = history;
 
             let updatedHistory = history;
-            if (firstItem.hash !== newItem.hash) {
+            if (firstItem === undefined || firstItem.hash !== newItem.hash) {
                 updatedHistory.unshift(newItem);
 
                 // Check if we're over our hard limit;
@@ -58,31 +58,16 @@ const createClipboardManager = () => {
             const settings = clipboardSettings.getSettings();
             const {history} = settings;
 
-            const index = getIndex(itemToUpdate);
-            if (index !== -1) {
-                // Using splice and the index we get the items before and after the index.
-                const before = history.splice(0, index);
-                const after = history.splice(-index);
+            // Removed the item from history.
+            const updatedHistory = history.filter((item) => item.id !== itemToUpdate.id);
 
-                // Update the history
-                await clipboardSettings.updateSettings({
-                    ...settings,
-                    history: [
-                        ...before,
-                        itemToUpdate,
-                        ...after,
-                    ],
-                });
-            }
-        },
-        removeOne: async (itemToRemove: ClipboardItems): Promise<void> => {
-            const settings = clipboardSettings.getSettings();
-            const {history} = settings;
-
-            // Update the history.
+            // Update the history
             await clipboardSettings.updateSettings({
                 ...settings,
-                history: await removeItemFromHistory({ item: itemToRemove, history }),
+                history: [
+                    itemToUpdate,
+                    ...updatedHistory,
+                ],
             });
         },
         removeMultiple: async (itemsToRemove: ClipboardItems[]): Promise<void> => {
@@ -127,6 +112,13 @@ const createClipboardManager = () => {
                 updatedHistory.splice(index, 1);
                 updatedHistory.unshift(itemToRestore);
 
+                // Update the history.
+                await clipboardSettings.updateSettings({
+                    ...settings,
+                    history: updatedHistory,
+                });
+
+                // Then submit the change.
                 const {type} = itemToRestore;
                 switch (type) {
                     case 'image': {

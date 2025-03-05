@@ -68,7 +68,7 @@ const createClipboardHandleChange = () => {
                 const { html, htmlHash, isHtmlEmpty } = data;
 
                 // We're getting the HTML, as HTML also contains the text in the HTML.
-                if (isHtmlEmpty && isHashDifferent('html', htmlHash)) {
+                if (!isHtmlEmpty && isHashDifferent('html', htmlHash)) {
                     updateHash('html', htmlHash);
 
                     const item = htmlToHtmlClipboardItem({ html, htmlText: text, hash: htmlHash });
@@ -79,7 +79,7 @@ const createClipboardHandleChange = () => {
 
                 // Text check we're checking if it contains a local path.
                 const stats = await UNSAFE_fileStats(text.trim());
-                if (isTextEmpty && stats && isHashDifferent('path', textHash)) {
+                if (!isTextEmpty && stats && isHashDifferent('path', textHash)) {
                     updateHash('path', textHash);
 
                     const item = textToPathClipboardItem({ text, stats, hash: textHash });
@@ -90,7 +90,7 @@ const createClipboardHandleChange = () => {
 
                 // Text check we're checking if it contains a valid URL.
                 const url = isTextAUrl(text.trim());
-                if (isTextEmpty && url && isHashDifferent('url', textHash)) {
+                if (!isTextEmpty && url && isHashDifferent('url', textHash)) {
                     updateHash('path', textHash);
 
                     const item = textToUrlClipboardItem({ text, url, hash: textHash });
@@ -109,7 +109,7 @@ const createClipboardHandleChange = () => {
                 }
 
                 // Text check we're checking if is not empty.
-                if (isTextEmpty && isHashDifferent('text', textHash)) {
+                if (!isTextEmpty && isHashDifferent('text', textHash)) {
                     updateHash('text', textHash);
 
                     const item = textToTextClipboardItem({ text, hash: textHash });
