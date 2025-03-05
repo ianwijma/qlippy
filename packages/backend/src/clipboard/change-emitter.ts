@@ -3,7 +3,7 @@ import {clipboard, NativeImage} from 'electron'
 import {sleep} from "../utils/sleep";
 import {sha1} from "../utils/crypto";
 
-const CLIPBOARD_CHECK_INTERVAL_MS = 2500; // TODO: change back to 250
+const CLIPBOARD_CHECK_INTERVAL_MS = 250;
 
 type ClipboardChangeTypes = 'image' | 'html' | 'text';
 
@@ -51,14 +51,21 @@ const createClipboardChangeEmitter = () => {
         const {isHtmlEmpty, htmlHash, html} = getClipboardHtml();
         const {isTextEmpty, textHash, text} = getClipboardText();
 
-        const hasImageChanged = isImageEmpty && imageHash !== hashMap.get('image');
-        const hasHtmlChanged = isHtmlEmpty && htmlHash !== hashMap.get('html');
-        const hasTextChanged = isTextEmpty && textHash !== hashMap.get('text');
+        const hasImageChanged = !isImageEmpty && imageHash !== hashMap.get('image');
+        const hasHtmlChanged = !isHtmlEmpty && htmlHash !== hashMap.get('html');
+        const hasTextChanged = !isTextEmpty && textHash !== hashMap.get('text');
 
         if (hasImageChanged || hasHtmlChanged || hasTextChanged) {
-            hashMap.set('image', imageHash);
-            hashMap.set('html', textHash);
-            hashMap.set('text', textHash);
+            console.log('change', { hasImageChanged, hasHtmlChanged, hasTextChanged });
+            console.log('emit', {
+                image, imageHash, isImageEmpty,
+                html, htmlHash, isHtmlEmpty,
+                text, textHash, isTextEmpty,
+            });
+
+            if (hasImageChanged) hashMap.set('image', imageHash);
+            if (hasHtmlChanged) hashMap.set('html', htmlHash);
+            if (hasTextChanged) hashMap.set('text', textHash);
 
             emit({
                 image, imageHash, isImageEmpty,
