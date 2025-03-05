@@ -186,13 +186,22 @@ const Details = ({ item }: DetailsProps) => {
             )
         }
         case ClipboardItemTypes.url: {
+            const {imageFilePath} = item;
+            if (imageFilePath) {
+                return (
+                    <div className='w-full h-full'>
+                        <img
+                            src={`app://${item.imageFilePath}`}
+                            alt='Clipboard url screenshot'
+                            className='w-full'
+                        />
+                    </div>
+                )
+            }
+
             return (
-                <div className='w-full h-full'>
-                    <img
-                        src={`site://${item.url}`}
-                        alt='Clipboard url screenshot'
-                        className='w-full'
-                    />
+                <div>
+                    Screenshotting site...
                 </div>
             )
         }
@@ -209,8 +218,21 @@ const Details = ({ item }: DetailsProps) => {
             )
         }
         case ClipboardItemTypes.image: {
+            const {imageFilePath} = item;
+            if (imageFilePath) {
+                return (
+                    <img
+                        src={`app://${item.imageFilePath}`}
+                        alt='Clipboard image'
+                        className='w-full h-full object-contain'
+                    />
+                )
+            }
+
             return (
-                <img src={`app://${item.imageFilePath}`} alt='Clipboard image' className='w-full h-full object-contain' />
+                <div>
+                    Saving image...
+                </div>
             )
         }
         default: {
