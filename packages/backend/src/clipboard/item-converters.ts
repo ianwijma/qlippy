@@ -31,7 +31,7 @@ export const nativeImageToImageClipboardItem = ({image, hash}: ConverterType<{im
         type: 'image',
         imageFilePath: undefined,
         ...getBase({ hash }),
-        aspectRadio: image.getAspectRatio(),
+        aspectRatio: image.getAspectRatio(),
         size: {
             width: imageSize.width,
             height: imageSize.height

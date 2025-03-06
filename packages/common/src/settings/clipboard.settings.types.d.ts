@@ -21,7 +21,7 @@ export type ClipboardImageBase = {
 
 export type ImageClipboardItem = ClipboardBaseItem & ClipboardImageBase & {
     type: 'image';
-    aspectRadio: number;
+    aspectRatio: number;
     size: {
         width: number;
         height: number;
