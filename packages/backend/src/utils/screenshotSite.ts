@@ -25,11 +25,13 @@ const createScreenshotUrl = () => {
                 console.error('Screenshot timed out', {error});
             }
 
-            const screenshot = await page.screenshot({fullPage: true, type});
+            try {
+                const screenshot = await page.screenshot({fullPage: true, optimizeForSpeed: true, type});
 
-            page.close().catch((err: Error) => console.error('Failed to close the page', {err}));
-
-            return Buffer.from(screenshot);
+                return Buffer.from(screenshot);
+            } finally {
+                page.close().catch((err: Error) => console.error('Failed to close the page', {err}));
+            }
         }
     }
 }
