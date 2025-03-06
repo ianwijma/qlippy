@@ -4,13 +4,12 @@ import {ClipboardQuery} from "./clipboard-query";
 import {ClipboardList} from "./clipboard-list";
 import {ClipboardDetails} from "./clipboard-details";
 import {useCallback, useMemo, useState} from "react";
-import {ClipboardType} from "@qlippy/common/src/clipboard.types";
 import {useSettings} from "../../hooks/useSettings";
 import {
-    ClipboardHistory, ClipboardHistoryIdToItemHash,
+    ClipboardHistory,
+    ClipboardId,
     ClipboardItem,
-    ClipboardHistoryId,
-    ClipboardItems,
+    ClipboardItemTypes,
     ClipboardSettings
 } from "@qlippy/common/src/settings/clipboard.settings.types";
 import {eventHandler} from "../../utils/eventHandler";
@@ -24,140 +23,131 @@ import {
 } from '@qlippy/common/src/events/clearClipboardHistory.event'
 import {useWindowControls} from "../../hooks/useWindowControls";
 
-export type SearchableItem = {
-    id: ClipboardHistoryId,
-    type: ClipboardType,
+export type SearchableHistory = {
+    id: ClipboardId,
+    type: ClipboardItemTypes,
     text: string,
+    item: ClipboardItem,
 }
 
 export default function ClipboardHistoryPage() {
     const {close} = useWindowControls();
     const [query, setQuery] = useState<string>('');
-    const [typeFilter, setTypeFilter] = useState<'' | ClipboardType>('');
+    const [typeFilter, setTypeFilter] = useState<'' | ClipboardItemTypes>('');
     const [selectedIndex, setSelectedIndex] = useState<number>(0);
     const {isLoading, settings} = useSettings<ClipboardSettings>('clipboard');
 
-    const {items, historyIdToItemHash, history} = useMemo<{items: ClipboardItems, history: ClipboardHistory, historyIdToItemHash: ClipboardHistoryIdToItemHash}>(() => ({
-        items: isLoading ? {} : settings.items,
-        historyIdToItemHash: isLoading ? {} as ClipboardHistoryIdToItemHash : settings.historyIdToItemHash,
+    const {history} = useMemo<{history: ClipboardHistory,}>(() => ({
         history: isLoading ? [] as ClipboardHistory : settings.history,
     }), [isLoading, settings]);
 
-    const selectedItem = useMemo<ClipboardItem | undefined>(() => {
-        const id = history?.[selectedIndex];
-        const hash = historyIdToItemHash?.[id];
-        return items?.[hash];
-    }, [selectedIndex, items, historyIdToItemHash, history]);
+    const searchableHistory = useMemo<SearchableHistory[]>(() => {
+        return history.map((item) => {
+            const {id, type} = item;
 
-    const itemToHistoryIdMap = useMemo<{[key: ClipboardHistoryId]: ClipboardItem}>(() => {
-        return history.reduce((acc, id) => {
-            const hash = historyIdToItemHash[id];
-            acc[id] = items[hash];
-            return acc
-        }, {})
-    }, [items, historyIdToItemHash, history])
+            const base = { id, type, item };
+            switch (type) {
+                case 'text': return {
+                    ...base,
+                    text: item.text.toString(),
+                };
+                case 'colour': return {
+                    ...base,
+                    text: item.colour.toLowerCase(),
+                }
+                case 'html': return {
+                    ...base,
+                    text: item.htmlText.toLowerCase(),
+                }
+                case 'url': return {
+                    ...base,
+                    text: item.url.toLowerCase(),
+                }
+                case 'path': {
+                    return {
+                        ...base,
+                        text: item.path.toLowerCase(),
+                    }
+                }
+                case 'image': return {
+                    ...base,
+                    text: `image`
+                }
+                default:
+                    // Make TS happy
+                    return undefined;
+            }
+        }).filter(Boolean);
+    }, [history]);
 
     const updateQuery = useCallback((query: string) => {
         setQuery(query);
         setSelectedIndex(0);
     }, [setQuery, setSelectedIndex]);
 
-    const updateTypeFilter = useCallback((type: '' | ClipboardType) => {
+    const updateTypeFilter = useCallback((type: '' | ClipboardItemTypes) => {
         setTypeFilter(type);
         setSelectedIndex(0);
     }, [setTypeFilter, setSelectedIndex]);
 
     const searchQuery = useMemo(() => query.toLowerCase(), [query]);
 
-    const searchableItems = useMemo<SearchableItem[]>(() => {
-        return history.map((id: ClipboardHistoryId) => {
-            const hash = historyIdToItemHash[id];
-            const item = items[hash] ?? undefined;
-            if (item) {
-                const {type, value} = item;
-                switch (type) {
-                    case "text":
-                    case "colour": {
-                        return {
-                            id,
-                            type,
-                            text: value.toLowerCase(),
-                        }
-                    }
-                    case "html":
-                    case "url":
-                    case "path": {
-                        const {metadata: { text }} = item
-                        return {
-                            id,
-                            type,
-                            text: text.toLowerCase(),
-                        }
-                    }
-                    case "image": {
-                        return {
-                            id,
-                            type,
-                            text: `image`
-                        }
-                    }
-                    default:
-                        return undefined;
-                }
-            }
-        }).filter(Boolean);
-    }, [items, history]);
-
-    const filteredHistory = useMemo<ClipboardHistoryId[]>(() => {
-        const filtered = [];
-
-        searchableItems.forEach(({ text, type, id }) => {
+    const filteredHistory = useMemo<SearchableHistory[]>(() => {
+        return searchableHistory.filter(({ text, type }) => {
             const textMatch = text.includes(searchQuery);
 
             const typeSearch = typeFilter !== '';
             const typeMatch = typeSearch ? typeFilter === type : true;
 
-            if (textMatch && typeMatch) {
-                filtered.push(id);
-            }
-        })
+            return textMatch && typeMatch;
+        });
+    }, [searchableHistory, searchQuery, typeFilter]);
 
-        return [...new Set(filtered)];
-    }, [searchableItems, searchQuery, typeFilter]);
+    const filteredItems = useMemo<ClipboardItem[]>(
+        () => filteredHistory.map(({item}) => item),
+        [filteredHistory]
+    );
+
+    const selectedItem = useMemo<ClipboardItem | undefined>(
+        () => filteredItems[selectedIndex],
+        [filteredItems, selectedIndex]
+    )
 
     const selectNext = useCallback(() => {
         const newSelectedIndex = selectedIndex + 1;
-        const hasNew = !!filteredHistory[newSelectedIndex];
-        if (hasNew) {
+        const hasNext = !!filteredHistory[newSelectedIndex];
+        if (hasNext) {
             setSelectedIndex(newSelectedIndex);
         }
     }, [filteredHistory, selectedIndex, setSelectedIndex]);
 
     const selectPrevious = useCallback(() => {
         const newSelectedIndex = selectedIndex - 1;
-        const hasNew = !!filteredHistory[newSelectedIndex];
-        if (hasNew) {
+        const hasPrevious = !!filteredHistory[newSelectedIndex];
+        if (hasPrevious) {
             setSelectedIndex(newSelectedIndex);
         }
     }, [filteredHistory, selectedIndex, setSelectedIndex]);
 
     const restoreSelected = useCallback(() => {
-        const id = filteredHistory[selectedIndex];
+        const searchable = filteredHistory[selectedIndex];
 
-        if (id) {
-            eventHandler.emit<RestoreClipboardHistoryEventData>(restoreClipboardHistoryEventName, { id });
+        if (searchable) {
+            eventHandler.emit<RestoreClipboardHistoryEventData>(restoreClipboardHistoryEventName, {
+                id: searchable.id
+            });
         }
 
         close();
     }, [filteredHistory, selectedIndex]);
 
     const clearSelected = useCallback(() => {
-        const id = filteredHistory[selectedIndex];
+        const searchable = filteredHistory[selectedIndex];
 
-        if (id) {
-            eventHandler.emit<ClearClipboardHistoryEventData>(clearClipboardHistoryEventName, {ids: [
-                filteredHistory[selectedIndex]
-            ]});
+        if (searchable) {
+            eventHandler.emit<ClearClipboardHistoryEventData>(clearClipboardHistoryEventName, {
+                ids: [ searchable.id ]
+            });
         }
 
         if (selectedIndex === filteredHistory.length - 1) setSelectedIndex(selectedIndex - 1);
@@ -165,9 +155,7 @@ export default function ClipboardHistoryPage() {
 
     const handleClose = useCallback(() => close(), [close])
 
-    const handleHover = useCallback((id: ClipboardHistoryId) => {
-        const index = filteredHistory.indexOf(id);
-
+    const handleHover = useCallback((index: number) => {
         if (index >= 0 && index < filteredHistory.length) {
             setSelectedIndex(index);
         } else {
@@ -175,10 +163,12 @@ export default function ClipboardHistoryPage() {
         }
     }, [setSelectedIndex, filteredHistory]);
 
-    const handleClicked = useCallback((id: ClipboardHistoryId) => {
-        if (id) {
+    const handleClicked = useCallback((index: number) => {
+        const item = filteredHistory[index];
+
+        if (item) {
             eventHandler.emit<RestoreClipboardHistoryEventData>(restoreClipboardHistoryEventName, {
-                id
+                id: item.id
             });
         }
 
@@ -203,8 +193,7 @@ export default function ClipboardHistoryPage() {
                 </div>
                 <div className="row-span-1 col-span-1 overflow-y-auto overflow-x-hidden rounded-bl-lg">
                     <ClipboardList
-                        items={itemToHistoryIdMap}
-                        history={filteredHistory}
+                        history={filteredItems}
                         selectedIndex={selectedIndex}
                         onItemHover={handleHover}
                         onItemClicked={handleClicked}/>

@@ -1,4 +1,4 @@
-import {ClipboardItem} from "@qlippy/common/src/settings/clipboard.settings.types";
+import {ClipboardItem, ClipboardItemTypes} from "@qlippy/common/src/settings/clipboard.settings.types";
 import {memo} from "react";
 import {HtmlFrame} from "../../components/htmlFrame";
 
@@ -19,7 +19,7 @@ export const ClipboardDetails = memo(({item}: ClipboardDetailsParams) => {
 })
 
 const getMetadataFromType = (item: ClipboardItem) => {
-    const {type, metadata, value, dateTimeCreated, dateTimeUpdated} = item;
+    const {type, dateTimeCreated} = item;
 
     const toDate = (dateMs: number): string => {
         const date = new Date(dateMs);
@@ -50,60 +50,59 @@ const getMetadataFromType = (item: ClipboardItem) => {
     }
 
     const baseData = {
-        'Copied first': toDate(dateTimeCreated),
-        'Copied last': toDate(dateTimeUpdated),
+        'Copied': toDate(dateTimeCreated),
     }
 
     switch (type) {
-        case "text":
+        case 'text':
             return {
                 'Type': 'text',
-                "Total characters": metadata.length,
+                "Total characters": String(item.length),
                 ...baseData,
             };
-        case "html":
+        case 'html':
             return {
                 'Type': 'HTML',
-                "Total characters": metadata.length,
-                "Text": metadata.text,
-                "Text total characters": metadata.textLength,
+                "Total characters": String(item.length),
+                "Text": item.htmlText,
+                "Text total characters": String(item.htmlTextLength),
                 ...baseData,
             };
-        case "url":
+        case 'url':
             return {
                 'Type': 'URL',
-                "URL Length": metadata.length,
-                "URL username": metadata.username,
-                "URL password": metadata.password,
-                "URL protocol": metadata.protocol,
-                "Url hostname": metadata.hostname,
-                "Url path": metadata.pathname,
-                "Url hash": metadata.hash,
-                "Url query": metadata.searchParams,
+                "URL Length": String(item.length),
+                "URL username": item.username,
+                "URL password": item.password,
+                "URL protocol": item.protocol,
+                "Url hostname": item.hostname,
+                "Url path": item.pathname,
+                "Url hash": item.hash,
+                "Url query": item.searchParams,
                 ...baseData,
             };
-        case "path": {
+        case 'path': {
             const defaultFirstData = {
                 'Type': 'File path',
-                "Path": value,
-                "Path length": metadata.length,
+                "Path": item.path,
+                "Path length": String(item.length),
                 ...baseData,
             }
 
             const defaultRestData = {
-                "User ID": metadata.userId,
-                "Group ID": metadata.groupId,
-                "Date created": toDate(metadata.createdMs),
-                "Date last accessed": toDate(metadata.lastAccessedMs),
-                "Date last modified": toDate(metadata.lastModifiedMs),
-                "Date status changed": toDate(metadata.statusChangedMs),
+                "User ID": String(item.userId),
+                "Group ID": String(item.groupId),
+                "Date created": toDate(item.createdMs),
+                "Date last accessed": toDate(item.lastAccessedMs),
+                "Date last modified": toDate(item.lastModifiedMs),
+                "Date status changed": toDate(item.statusChangedMs),
                 ...baseData,
             }
 
-            if (metadata.isFile) {
+            if (item.isFile) {
                 return {
                     ...defaultFirstData,
-                    'Size': humanFileSize(metadata.size),
+                    'Size': humanFileSize(item.size),
                     ...defaultRestData,
                     ...baseData,
                 }
@@ -115,21 +114,22 @@ const getMetadataFromType = (item: ClipboardItem) => {
                 ...baseData,
             };
         }
-        case "colour":
+        case 'colour':
             return {
                 'Type': 'Colour',
+                'Colour': String(item.colour),
                 ...baseData,
             };
-        case "image":
+        case 'image':
             return {
                 'Type': 'Image',
-                'Image width': metadata.size.width,
-                'Image height': metadata.size.height,
+                'Image width': String(item.size.width),
+                'Image height': String(item.size.height),
                 ...baseData,
             };
         default:
             return {
-                ...(metadata as Object),
+                ...(item as ClipboardItem),
                 ...baseData,
             };
     }
@@ -169,53 +169,75 @@ const Metadata = ({ item }: MetadataProps) => {
 
 type DetailsProps = { item: ClipboardItem };
 const Details = ({ item }: DetailsProps) => {
-    const {type, value} = item;
+    const { type } = item;
 
     switch (type) {
-        case "text": {
+        case 'text': {
             return (
                 <div>
-                    {value}
+                    {item.text}
                 </div>
             )
         }
-        case "html": {
+        case 'html': {
             return (
-                <HtmlFrame>{value}</HtmlFrame>
+                <HtmlFrame>{item.html}</HtmlFrame>
             )
         }
-        case "url": {
+        case 'url': {
+            const {imageFilePath} = item;
+            if (imageFilePath) {
+                return (
+                    <div className='w-full h-full'>
+                        <img
+                            src={`app://${item.imageFilePath}`}
+                            alt='Clipboard url screenshot'
+                            className='w-full'
+                        />
+                    </div>
+                )
+            }
+
             return (
-                <div className='w-full h-full'>
+                <div>
+                    Screenshotting site...
+                </div>
+            )
+        }
+        case 'path': {
+            return (
+                <div>
+                    {item.path}
+                </div>
+            )
+        }
+        case 'colour': {
+            return (
+                <div style={{ backgroundColor: item.colour }} className='w-full h-full'></div>
+            )
+        }
+        case 'image': {
+            const {imageFilePath} = item;
+            if (imageFilePath) {
+                return (
                     <img
-                        src={`site://${value}`}
-                        alt='Clipboard url screenshot'
-                        className='w-full'
+                        src={`app://${item.imageFilePath}`}
+                        alt='Clipboard image'
+                        className='w-full h-full object-contain'
                     />
-                </div>
-            )
-        }
-        case "path": {
+                )
+            }
+
             return (
                 <div>
-                    {value}
+                    Saving image...
                 </div>
-            )
-        }
-        case "colour": {
-            return (
-                <div style={{ backgroundColor: value }} className='w-full h-full'></div>
-            )
-        }
-        case "image": {
-            return (
-                <img src={`app://${value}`} alt='Clipboard image' className='w-full h-full object-contain' />
             )
         }
         default: {
             return (
                 <div>
-                    {value}
+                    No preview available for {type}
                 </div>
             )
         }

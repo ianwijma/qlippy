@@ -17,18 +17,22 @@ export const useSettings = <T extends BaseSettings>(settingsName: SettingsName) 
     const isLoading = settings === null;
 
     const initializeSettings = async () => {
-        const initialSettings = await responseHandler.requestResponse<SettingsRequestRes<T>, SettingsRequestReq>(
-            settingsRequestName,
-            {settingsName},
-            {timeout: 200}
-        );
+        try {
+            const initialSettings = await responseHandler.requestResponse<SettingsRequestRes<T>, SettingsRequestReq>(
+                settingsRequestName,
+                {settingsName},
+                {timeout: 200}
+            );
 
-        console.log('Setting Initialised', {
-            settingsName,
-            initialSettings
-        });
+            console.log('Setting Initialised', {
+                settingsName,
+                initialSettings
+            });
 
-        setSettings(initialSettings);
+            setSettings(initialSettings);
+        } catch (error) {
+            console.error('Failed to fetch and update the settings', {error});
+        }
     }
 
     useListen<SettingsUpdatedEventData<T>>(settingsUpdatedEventName, (response) => {

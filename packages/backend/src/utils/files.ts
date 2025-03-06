@@ -5,6 +5,7 @@ import {isDev} from "./isDev";
 import {app} from "electron";
 import {Buffer} from "node:buffer";
 import {Stream} from "node:stream";
+import {Stats} from "node:fs";
 
 const FILES_DIR = isDev() ? '.files-dev' : '.files';
 const ROOT_DIR = path.resolve(app.getPath('userData'), FILES_DIR);
@@ -74,6 +75,25 @@ export const fileExists = async (relativeFilePath: string): Promise<string | fal
     }
 
     return normalizePath;
+}
+
+export const removeFile = async (relativeFilePath: string): Promise<void> => {
+    const normalizePath = normalizeFilePath(relativeFilePath);
+
+    await fs.unlink(normalizePath);
+}
+
+/**
+ * Unsafe because it allows checking of file outside the syste,
+ */
+export const UNSAFE_fileExists = async (absolutePath: string): Promise<boolean> => {
+    const stats: Stats | false = await fs.stat(absolutePath).catch(() => false);
+
+    return !!stats;
+}
+
+export const UNSAFE_fileStats = async (absolutePath: string): Promise<Stats | false> => {
+    return await fs.stat(absolutePath).catch(() => false);
 }
 
 export const readYamlFile = async <T>(relativeFilePath: string): Promise<T> => {
