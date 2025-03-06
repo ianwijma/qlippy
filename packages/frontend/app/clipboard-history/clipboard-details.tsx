@@ -129,7 +129,7 @@ const getMetadataFromType = (item: ClipboardItems) => {
             };
         default:
             return {
-                ...(item as Object),
+                ...(item as ClipboardItems),
                 ...baseData,
             };
     }

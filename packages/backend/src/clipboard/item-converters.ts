@@ -21,7 +21,7 @@ const getBase = ({hash}: GetBaseProps): ClipboardBaseItem => ({
     dateTimeCreated: Date.now(),
 });
 
-type ConverterType<Base extends Object> = Base & {
+type ConverterType<Base extends Record<string, any>> = Base & {
     hash: string,
 }
 
@@ -143,7 +143,7 @@ export const textToUrlClipboardItem = ({text, url, hash}: ConverterType<{text: s
         port: url.port,
         protocol: url.protocol,
         search: url.search,
-        searchParams: url.search ? JSON.parse('{"' + decodeURI(url.search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}') : {},
+        searchParams: Object.fromEntries(url.searchParams.entries()),
         username: url.username,
     }
 }

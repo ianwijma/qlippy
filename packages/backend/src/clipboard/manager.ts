@@ -76,7 +76,7 @@ const createClipboardManager = () => {
 
             let updatedHistory = history;
             for (const item of itemsToRemove) {
-                updatedHistory = await removeItemFromHistory({ item, history })
+                updatedHistory = await removeItemFromHistory({ item, history: updatedHistory })
             }
 
             // Update the history.
@@ -91,7 +91,7 @@ const createClipboardManager = () => {
 
             let updatedHistory = history;
             for (const item of history) {
-                updatedHistory = await removeItemFromHistory({ item, history })
+                updatedHistory = await removeItemFromHistory({ item, history: updatedHistory })
             }
 
             // Update the history.

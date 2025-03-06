@@ -9,7 +9,9 @@ const createClipboardHandleRestore = () => {
         initialize: async (): Promise<void> => {
             eventHandler.listen<RestoreClipboardHistoryEventData>(restoreClipboardHistoryEventName, async ({id}) => {
                 const item = clipboardManager.getById(id);
-                await clipboardManager.restore(item);
+                if (item) {
+                    await clipboardManager.restore(item);
+                }
             });
         }
     }

@@ -91,7 +91,7 @@ const createClipboardHandleChange = () => {
                 // Text check we're checking if it contains a valid URL.
                 const url = isTextAUrl(text.trim());
                 if (!isTextEmpty && url && isHashDifferent('url', textHash)) {
-                    updateHash('path', textHash);
+                    updateHash('url', textHash);
 
                     const item = textToUrlClipboardItem({ text, url, hash: textHash });
                     await clipboardManager.add(item);

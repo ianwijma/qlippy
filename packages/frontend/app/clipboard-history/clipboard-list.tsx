@@ -53,42 +53,47 @@ const ClipboardListItem = ({item}: ClipboardListItemParams) => {
     const {type} = item;
 
     switch (type) {
-        case 'text':
+        case 'text': {
             const {text} = item;
             return (
                 <div className="truncate" data-text>
                     {text}
                 </div>
             )
-        case 'html':
+        }
+        case 'html': {
             const {htmlText} = item;
             return (
                 <div className="truncate" data-html>
                     {htmlText}
                 </div>
             )
-        case 'url':
+        }
+        case 'url': {
             const {url} = item;
             return (
                 <div className='truncate' data-url>
                     {url}
                 </div>
             )
-        case 'path':
+        }
+        case 'path': {
             const {path} = item;
             return (
                 <div className='truncate' data-path>
                     {path}
                 </div>
             )
-        case 'colour':
+        }
+        case 'colour': {
             const {colour, colourText} = item;
             return (
                 <div className='truncate flex items-center gap-1' data-colour>
                     <span style={{ backgroundColor: colour }} className="w-8 h-8" /> {colourText}
                 </div>
             )
-        case 'image':
+        }
+        case 'image': {
             const {imageFilePath} = item;
             return (
                 <div className='truncate flex items-center gap-1 h-full' data-image>
@@ -100,5 +105,6 @@ const ClipboardListItem = ({item}: ClipboardListItemParams) => {
                     }
                 </div>
             )
+        }
     }
 }
