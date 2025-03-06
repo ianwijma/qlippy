@@ -1,6 +1,6 @@
 import {
     ClipboardId,
-    ClipboardItems,
+    ClipboardItem,
 } from '@qlippy/common/src/settings/clipboard.settings.types'
 import {clipboardSettings} from "../settings/clipboard.setting";
 import {readFile, removeFile} from "../utils/files";
@@ -9,7 +9,7 @@ import {clipboard, nativeImage} from "electron";
 const CLIPBOARD_AMOUNT_LIMIT = 1000;
 
 const createClipboardManager = () => {
-    const removeItemFromHistory = async ({item, history}: {item: ClipboardItems, history: ClipboardItems[]}): Promise<ClipboardItems[]> => {
+    const removeItemFromHistory = async ({item, history}: {item: ClipboardItem, history: ClipboardItem[]}): Promise<ClipboardItem[]> => {
         // Check if there are any files we need to remove.
         const {type} = item;
         if (type === 'image' || type === 'url') {
@@ -23,7 +23,7 @@ const createClipboardManager = () => {
         return history.filter(({ id }) => id !== item.id);
     }
 
-    const getIndex = (item: ClipboardItems): number => {
+    const getIndex = (item: ClipboardItem): number => {
         const settings = clipboardSettings.getSettings();
         const {history} = settings;
 
@@ -31,7 +31,7 @@ const createClipboardManager = () => {
     }
 
     return {
-        add: async (newItem: ClipboardItems): Promise<void> => {
+        add: async (newItem: ClipboardItem): Promise<void> => {
             const settings = clipboardSettings.getSettings();
             const {history} = settings;
             const [firstItem = undefined] = history;
@@ -54,7 +54,7 @@ const createClipboardManager = () => {
                 history: updatedHistory,
             });
         },
-        update: async (itemToUpdate: ClipboardItems): Promise<void> => {
+        update: async (itemToUpdate: ClipboardItem): Promise<void> => {
             const settings = clipboardSettings.getSettings();
             const {history} = settings;
 
@@ -70,7 +70,7 @@ const createClipboardManager = () => {
                 ],
             });
         },
-        removeMultiple: async (itemsToRemove: ClipboardItems[]): Promise<void> => {
+        removeMultiple: async (itemsToRemove: ClipboardItem[]): Promise<void> => {
             const settings = clipboardSettings.getSettings();
             const {history} = settings;
 
@@ -100,7 +100,7 @@ const createClipboardManager = () => {
                 history: updatedHistory,
             });
         },
-        restore: async (itemToRestore: ClipboardItems): Promise<void> => {
+        restore: async (itemToRestore: ClipboardItem): Promise<void> => {
             const settings = clipboardSettings.getSettings();
             const {history} = settings;
 
@@ -159,13 +159,11 @@ const createClipboardManager = () => {
                 }
             }
         },
-        getById: (id: ClipboardId): undefined | ClipboardItems => {
+        getById: (id: ClipboardId): undefined | ClipboardItem => {
             const settings = clipboardSettings.getSettings();
             const {history} = settings;
 
-            const [foundItem = undefined] = history.filter((item) => item.id === id);
-
-            return foundItem;
+            return history.find((item) => item.id === id);
         },
     }
 }

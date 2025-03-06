@@ -8,7 +8,7 @@ import {useSettings} from "../../hooks/useSettings";
 import {
     ClipboardHistory,
     ClipboardId,
-    ClipboardItems,
+    ClipboardItem,
     ClipboardItemTypes,
     ClipboardSettings
 } from "@qlippy/common/src/settings/clipboard.settings.types";
@@ -27,7 +27,7 @@ export type SearchableHistory = {
     id: ClipboardId,
     type: ClipboardItemTypes,
     text: string,
-    item: ClipboardItems,
+    item: ClipboardItem,
 }
 
 export default function ClipboardHistoryPage() {
@@ -103,12 +103,12 @@ export default function ClipboardHistoryPage() {
         });
     }, [searchableHistory, searchQuery, typeFilter]);
 
-    const filteredItems = useMemo<ClipboardItems[]>(
+    const filteredItems = useMemo<ClipboardItem[]>(
         () => filteredHistory.map(({item}) => item),
         [filteredHistory]
     );
 
-    const selectedItem = useMemo<ClipboardItems | undefined>(
+    const selectedItem = useMemo<ClipboardItem | undefined>(
         () => filteredItems[selectedIndex],
         [filteredItems, selectedIndex]
     )

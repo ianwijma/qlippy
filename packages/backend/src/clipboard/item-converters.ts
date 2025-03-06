@@ -133,7 +133,6 @@ export const textToUrlClipboardItem = ({text, url, hash}: ConverterType<{text: s
         imageFilePath: undefined,
         ...getBase({ hash }),
         length: urlString.length,
-        hash: url.hash,
         host: url.host,
         hostname: url.hostname,
         href: url.href,

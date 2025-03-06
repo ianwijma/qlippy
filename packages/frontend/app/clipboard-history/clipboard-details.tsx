@@ -1,8 +1,8 @@
-import {ClipboardItems, ClipboardItemTypes} from "@qlippy/common/src/settings/clipboard.settings.types";
+import {ClipboardItem, ClipboardItemTypes} from "@qlippy/common/src/settings/clipboard.settings.types";
 import {memo} from "react";
 import {HtmlFrame} from "../../components/htmlFrame";
 
-export type ClipboardDetailsParams = { item: ClipboardItems | undefined };
+export type ClipboardDetailsParams = { item: ClipboardItem | undefined };
 export const ClipboardDetails = memo(({item}: ClipboardDetailsParams) => {
     if (!item) return '';
 
@@ -18,7 +18,7 @@ export const ClipboardDetails = memo(({item}: ClipboardDetailsParams) => {
     )
 })
 
-const getMetadataFromType = (item: ClipboardItems) => {
+const getMetadataFromType = (item: ClipboardItem) => {
     const {type, dateTimeCreated} = item;
 
     const toDate = (dateMs: number): string => {
@@ -129,13 +129,13 @@ const getMetadataFromType = (item: ClipboardItems) => {
             };
         default:
             return {
-                ...(item as ClipboardItems),
+                ...(item as ClipboardItem),
                 ...baseData,
             };
     }
 }
 
-type MetadataProps = { item: ClipboardItems };
+type MetadataProps = { item: ClipboardItem };
 const Metadata = ({ item }: MetadataProps) => {
     const metadata= getMetadataFromType(item);
 
@@ -167,7 +167,7 @@ const Metadata = ({ item }: MetadataProps) => {
     )
 }
 
-type DetailsProps = { item: ClipboardItems };
+type DetailsProps = { item: ClipboardItem };
 const Details = ({ item }: DetailsProps) => {
     const { type } = item;
 

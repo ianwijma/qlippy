@@ -67,7 +67,6 @@ export type UrlClipboardItem = ClipboardBaseItem & ClipboardImageBase & {
     type: 'url';
     url: string;
     length: number;
-    hash: string;
     host: string;
     hostname: string;
     href: string;
@@ -96,14 +95,14 @@ export type TextClipboardItem = ClipboardBaseItem & {
     length: number;
 }
 
-export type ClipboardItems = ImageClipboardItem
+export type ClipboardItem = ImageClipboardItem
     | HtmlClipboardItem
     | PathClipboardItem
     | UrlClipboardItem
     | ColourClipboardItem
     | TextClipboardItem;
 
-export type ClipboardHistory = ClipboardItems[];
+export type ClipboardHistory = ClipboardItem[];
 
 export type ClipboardSettings = BaseSettings & {
     history: ClipboardHistory;
