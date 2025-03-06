@@ -139,8 +139,8 @@ const createClipboardManager = () => {
                         break;
                     }
                     case 'colour': {
-                        const {colour} = itemToRestore;
-                        clipboard.writeText(colour, 'clipboard');
+                        const {colourText} = itemToRestore;
+                        clipboard.writeText(colourText, 'clipboard');
                         break;
                     }
                     case 'html': {

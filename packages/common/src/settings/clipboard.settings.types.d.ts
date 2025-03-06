@@ -13,7 +13,6 @@ export type ClipboardBaseItem = {
 
     // Created and updated fields
     dateTimeCreated: number;
-    dateTimeUpdated: number;
 }
 
 export type ClipboardImageBase = {
@@ -85,6 +84,7 @@ export type UrlClipboardItem = ClipboardBaseItem & ClipboardImageBase & {
 export type ColourClipboardItem = ClipboardBaseItem & {
     type: 'colour';
     colour: string;
+    colourText: string;
     isHex: boolean;
     isShortHex: boolean;
     isTransparentHex: boolean;

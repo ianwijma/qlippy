@@ -82,10 +82,10 @@ const ClipboardListItem = ({item}: ClipboardListItemParams) => {
                 </div>
             )
         case 'colour':
-            const {colour} = item;
+            const {colour, colourText} = item;
             return (
                 <div className='truncate flex items-center gap-1' data-colour>
-                    <span style={{ backgroundColor: colour }} className="w-8 h-8" /> {colour}
+                    <span style={{ backgroundColor: colour }} className="w-8 h-8" /> {colourText}
                 </div>
             )
         case 'image':

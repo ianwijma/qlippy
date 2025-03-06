@@ -19,7 +19,7 @@ export const ClipboardDetails = memo(({item}: ClipboardDetailsParams) => {
 })
 
 const getMetadataFromType = (item: ClipboardItems) => {
-    const {type, dateTimeCreated, dateTimeUpdated} = item;
+    const {type, dateTimeCreated} = item;
 
     const toDate = (dateMs: number): string => {
         const date = new Date(dateMs);
@@ -50,29 +50,28 @@ const getMetadataFromType = (item: ClipboardItems) => {
     }
 
     const baseData = {
-        'Copied first': toDate(dateTimeCreated),
-        'Copied last': toDate(dateTimeUpdated),
+        'Copied': toDate(dateTimeCreated),
     }
 
     switch (type) {
         case 'text':
             return {
                 'Type': 'text',
-                "Total characters": item.length,
+                "Total characters": String(item.length),
                 ...baseData,
             };
         case 'html':
             return {
                 'Type': 'HTML',
-                "Total characters": item.length,
+                "Total characters": String(item.length),
                 "Text": item.htmlText,
-                "Text total characters": item.htmlTextLength,
+                "Text total characters": String(item.htmlTextLength),
                 ...baseData,
             };
         case 'url':
             return {
                 'Type': 'URL',
-                "URL Length": item.length,
+                "URL Length": String(item.length),
                 "URL username": item.username,
                 "URL password": item.password,
                 "URL protocol": item.protocol,
@@ -86,13 +85,13 @@ const getMetadataFromType = (item: ClipboardItems) => {
             const defaultFirstData = {
                 'Type': 'File path',
                 "Path": item.path,
-                "Path length": item.length,
+                "Path length": String(item.length),
                 ...baseData,
             }
 
             const defaultRestData = {
-                "User ID": item.userId,
-                "Group ID": item.groupId,
+                "User ID": String(item.userId),
+                "Group ID": String(item.groupId),
                 "Date created": toDate(item.createdMs),
                 "Date last accessed": toDate(item.lastAccessedMs),
                 "Date last modified": toDate(item.lastModifiedMs),
@@ -118,14 +117,14 @@ const getMetadataFromType = (item: ClipboardItems) => {
         case 'colour':
             return {
                 'Type': 'Colour',
-                'Colour': item.colour,
+                'Colour': String(item.colour),
                 ...baseData,
             };
         case 'image':
             return {
                 'Type': 'Image',
-                'Image width': item.size.width,
-                'Image height': item.size.height,
+                'Image width': String(item.size.width),
+                'Image height': String(item.size.height),
                 ...baseData,
             };
         default:

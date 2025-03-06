@@ -19,7 +19,6 @@ const getBase = ({hash}: GetBaseProps): ClipboardBaseItem => ({
     id: nanoid(),
     hash,
     dateTimeCreated: Date.now(),
-    dateTimeUpdated: Date.now(),
 });
 
 type ConverterType<Base extends Object> = Base & {
@@ -40,9 +39,9 @@ export const nativeImageToImageClipboardItem = ({image, hash}: ConverterType<{im
     }
 };
 
-const HEX_COLOUR_SHORT_REGEX = /^#([0-9A-F]{3}){1,2}$/i;
-const HEX_COLOUR_REGEX = /^#[0-9A-F]{6}$/i;
-const HEX_COLOUR_TRANSPARENT_REGEX = /^#[0-9A-F]{6}[0-9a-f]{0,2}$/i;
+const HEX_COLOUR_SHORT_REGEX = /^#?([0-9A-F]{3}){1,2}$/i;
+const HEX_COLOUR_REGEX = /^#?[0-9A-F]{6}$/i;
+const HEX_COLOUR_TRANSPARENT_REGEX = /^#?[0-9A-F]{6}[0-9a-f]{0,2}$/i;
 
 export const isTextAColour = (text: string) => {
     const colour = text.trim();
@@ -53,14 +52,25 @@ export const isTextAColour = (text: string) => {
 }
 
 export const textToColourClipboardItem = ({text, hash}: ConverterType<{text: string}>): ColourClipboardItem => {
-    const colour = text.trim();
+    let colour = text.trim();
+
+    const isHex = HEX_COLOUR_REGEX.test(colour);
+    const isShortHex = HEX_COLOUR_SHORT_REGEX.test(colour);
+    const isTransparentHex = HEX_COLOUR_TRANSPARENT_REGEX.test(colour);
+
+
+    if (!colour.startsWith('#') && (isHex || isShortHex || isTransparentHex)) {
+        colour = `#${colour}`;
+    }
+
     return {
         type: 'colour',
         colour,
+        colourText: text,
         ...getBase({ hash }),
-        isHex: HEX_COLOUR_REGEX.test(colour),
-        isShortHex: HEX_COLOUR_SHORT_REGEX.test(colour),
-        isTransparentHex: HEX_COLOUR_TRANSPARENT_REGEX.test(colour),
+        isHex,
+        isShortHex,
+        isTransparentHex,
     }
 }
 
