@@ -123,9 +123,11 @@ const createClipboardManager = () => {
                 switch (type) {
                     case 'image': {
                         const {imageFilePath} = itemToRestore;
-                        const imageBuffer = await readFile(imageFilePath);
-                        const image = nativeImage.createFromBuffer(imageBuffer);
-                        clipboard.writeImage(image, 'clipboard');
+                        if (imageFilePath) {
+                            const imageBuffer = await readFile(imageFilePath);
+                            const image = nativeImage.createFromBuffer(imageBuffer);
+                            clipboard.writeImage(image, 'clipboard');
+                        }
                         break;
                     }
                     case 'url': {
