@@ -24,7 +24,7 @@ export const ClipboardList = ({ history, selectedIndex, onItemClicked, onItemDou
     }, [selectedRef, selectedIndex]);
 
     return (
-        <ul className='not-draggable flex flex-col gap-1 cursor-default select-none'>
+        <ul className='not-draggable flex flex-col gap-1 cursor-default'>
             {
                 Object.keys(history).map((group, index  ) => {
                     const items = history[group] ?? [];

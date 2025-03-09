@@ -188,7 +188,7 @@ export default function ClipboardHistoryPage() {
     }, [setSelectedIndex, filteredHistory]);
 
     return (
-        <div className="draggable bg-opacity-70 bg-white rounded-xl">
+        <div className="draggable bg-opacity-70 bg-white rounded-xl select-none">
             <div className="h-screen w-screen max-w-full grid gap-2 p-2 grid-rows-[3rem_1fr] grid-cols-[2fr_3fr]">
                 <div className="col-span-2 row-span-1">
                     <ClipboardQuery
