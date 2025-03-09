@@ -23,6 +23,7 @@ import {
 } from '@qlippy/common/src/events/clearClipboardHistory.event'
 import {useWindowControls} from "../../hooks/useWindowControls";
 import {toHumanDateAgo} from '@qlippy/common/src/date'
+import {ClipboardMenu} from "./clipboard-menu";
 
 export type SearchableHistory = {
     id: ClipboardId,
@@ -36,6 +37,7 @@ export type SearchableGroupedHistory = Record<string, SearchableHistory[]>;
 
 export default function ClipboardHistoryPage() {
     const {close} = useWindowControls();
+    const [showMenu, setShowMenu] = useState<boolean>(false);
     const [query, setQuery] = useState<string>('');
     const [typeFilter, setTypeFilter] = useState<'' | ClipboardItemTypes>('');
     const [selectedIndex, setSelectedIndex] = useState<number>(0);
@@ -187,8 +189,12 @@ export default function ClipboardHistoryPage() {
         close();
     }, [setSelectedIndex, filteredHistory]);
 
+    const handleShowMenu = useCallback(() => setShowMenu(true), [setShowMenu]);
+    const handleHideMenu = useCallback(() => setShowMenu(false), [setShowMenu]);
+
     return (
-        <div className="draggable bg-opacity-70 bg-white rounded-xl select-none">
+        <div className="draggable bg-opacity-70 bg-white rounded-xl select-none relative">
+            <ClipboardMenu show={showMenu} item={selectedItem} />
             <div className="h-screen w-screen max-w-full grid gap-2 p-2 grid-rows-[3rem_1fr] grid-cols-[2fr_3fr]">
                 <div className="col-span-2 row-span-1">
                     <ClipboardQuery
@@ -201,6 +207,9 @@ export default function ClipboardHistoryPage() {
                         confirmSelected={restoreSelected}
                         deleteSelected={clearSelected}
                         close={handleClose}
+                        isMenuShown={showMenu}
+                        showMenu={handleShowMenu}
+                        hideMenu={handleHideMenu}
                     />
                 </div>
                 <div className="row-span-1 col-span-1 overflow-y-auto overflow-x-hidden rounded-bl-lg relative">
