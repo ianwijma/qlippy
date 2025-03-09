@@ -22,7 +22,7 @@ export const ClipboardMenu = memo(({show, item}: ClipboardMenuParams) => {
         >
 
             <div className='bg-opacity-80 bg-white w-1/2 h-1/2 text-gray-500 pl-2 pt-3'>
-                <ul className=''>
+                <ul>
                     {
                         Object.keys(keyCombos).map((key) => {
                             const description = keyCombos[key]
