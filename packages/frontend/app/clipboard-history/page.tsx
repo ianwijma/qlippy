@@ -193,7 +193,7 @@ export default function ClipboardHistoryPage() {
     const handleHideMenu = useCallback(() => setShowMenu(false), [setShowMenu]);
 
     return (
-        <div className="draggable bg-opacity-70 bg-white rounded-xl select-none relative">
+        <div className="draggable bg-opacity-70 bg-white rounded-xl select-none relative overflow-clip">
             <ClipboardMenu show={showMenu} item={selectedItem} />
             <div className="h-screen w-screen max-w-full grid gap-2 p-2 grid-rows-[3rem_1fr] grid-cols-[2fr_3fr]">
                 <div className="col-span-2 row-span-1">
