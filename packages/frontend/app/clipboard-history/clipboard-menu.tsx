@@ -16,10 +16,11 @@ export const ClipboardMenu = memo(({show, item}: ClipboardMenuParams) => {
         ...baseKeyCombos,
     }), [item]);
 
-    if (!show) return null;
-
     return (
-        <div className='absolute w-screen h-screen bg-opacity-50 bg-black z-[9999] flex items-center justify-center'>
+        <div
+            className='absolute w-screen h-screen bg-opacity-50 bg-black z-[9999] flex items-center justify-center transition-opacity'
+            style={{ opacity: show ? 100 : 0 }}
+        >
 
             <div className='bg-opacity-80 bg-white w-1/2 h-1/2 text-gray-500 pl-2 pt-3'>
                 <ul className=''>
