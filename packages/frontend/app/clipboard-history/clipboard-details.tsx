@@ -123,8 +123,9 @@ const getMetadataFromType = (item: ClipboardItem) => {
         case 'image':
             return {
                 'Type': 'Image',
-                'Image width': String(item.size.width),
-                'Image height': String(item.size.height),
+                'Image size': item.size ? humanFileSize(item.size) : undefined,
+                'Image width': String(item.width),
+                'Image height': String(item.height),
                 ...baseData,
             };
         default:
@@ -147,7 +148,7 @@ const Metadata = ({ item }: MetadataProps) => {
                 return (
                     <li key={key} className="truncate">
                         {key}: {
-                        typeof value === 'string' ? value : (
+                        typeof value === 'string' ? value : value && (
                             <ul className='ml-3'>
                                 {Object.keys(value).map((subKey: string) => {
                                     const subValue = value[subKey];

@@ -32,10 +32,8 @@ export const nativeImageToImageClipboardItem = ({image, hash}: ConverterType<{im
         imageFilePath: undefined,
         ...getBase({ hash }),
         aspectRatio: image.getAspectRatio(),
-        size: {
-            width: imageSize.width,
-            height: imageSize.height
-        },
+        width: imageSize.width,
+        height: imageSize.height,
     }
 };
 

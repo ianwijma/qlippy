@@ -22,10 +22,9 @@ export type ClipboardImageBase = {
 export type ImageClipboardItem = ClipboardBaseItem & ClipboardImageBase & {
     type: 'image';
     aspectRatio: number;
-    size: {
-        width: number;
-        height: number;
-    };
+    width: number;
+    height: number;
+    size?: number;
 }
 
 export type HtmlClipboardItem = ClipboardBaseItem & {

@@ -15,7 +15,7 @@ import {
 } from "./item-converters";
 import {clipboardManager} from "./manager";
 import { join as pathJoin } from 'node:path'
-import {fileExists, UNSAFE_fileStats, writeFile} from "../utils/files";
+import {fileExists, fileStats, UNSAFE_fileStats, writeFile} from "../utils/files";
 import {screenshotUrl} from "../utils/screenshotSite";
 
 const CLIPBOARD_STORAGE_PATH = 'clipboard-files';
@@ -48,6 +48,12 @@ const createClipboardHandleChange = () => {
                         const imagePng = image.toPNG();
                         item.imageFilePath = await writeFile(filePath, imagePng);
                         await clipboardManager.update(item);
+
+                        const imageStats = await fileStats(filePath);
+                        if (imageStats !== false) {
+                            item.size = imageStats.size;
+                            await clipboardManager.update(item);
+                        }
                     }
 
                     return; // is handled

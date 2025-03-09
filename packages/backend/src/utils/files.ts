@@ -96,6 +96,12 @@ export const UNSAFE_fileStats = async (absolutePath: string): Promise<Stats | fa
     return await fs.stat(absolutePath).catch(() => false);
 }
 
+export const fileStats = async (relativeFilePath: string): Promise<Stats | false> => {
+    const normalizePath = normalizeFilePath(relativeFilePath);
+
+    return await fs.stat(normalizePath).catch(() => false);
+}
+
 export const readYamlFile = async <T>(relativeFilePath: string): Promise<T> => {
     const fileContent = await readStringFile(relativeFilePath);
 
