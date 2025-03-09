@@ -108,6 +108,9 @@ const createClipboardManager = () => {
             if (index !== -1) {
                 let updatedHistory = history;
 
+                // Updated the date
+                itemToRestore.dateTimeCopied = Date.now();
+
                 // Move the item to the top of the history.
                 updatedHistory.splice(index, 1);
                 updatedHistory.unshift(itemToRestore);

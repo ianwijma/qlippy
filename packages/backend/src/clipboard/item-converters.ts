@@ -18,7 +18,7 @@ type GetBaseProps = {
 const getBase = ({hash}: GetBaseProps): ClipboardBaseItem => ({
     id: nanoid(),
     hash,
-    dateTimeCreated: Date.now(),
+    dateTimeCopied: Date.now(),
 });
 
 type ConverterType<Base extends Record<string, any>> = Base & {

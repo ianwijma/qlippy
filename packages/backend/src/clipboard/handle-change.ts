@@ -74,7 +74,7 @@ const createClipboardHandleChange = () => {
                 const { html, htmlHash, isHtmlEmpty } = data;
 
                 // We're getting the HTML, as HTML also contains the text in the HTML.
-                if (!isHtmlEmpty && isHashDifferent('html', htmlHash)) {
+                if (!isHtmlEmpty && !isTextEmpty && isHashDifferent('html', htmlHash)) {
                     updateHash('html', htmlHash);
 
                     const item = htmlToHtmlClipboardItem({ html, htmlText: text, hash: htmlHash });

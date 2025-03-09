@@ -1,18 +1,18 @@
 import {
     ClipboardHistory,
     ClipboardItem,
-    ClipboardItemTypes,
 } from "@qlippy/common/src/settings/clipboard.settings.types";
 import {useEffect, useRef} from "react";
+import {SearchableGroupedHistory} from "./page";
 
 export type ClipboardListParams = {
-    history: ClipboardHistory,
+    history: SearchableGroupedHistory,
     selectedIndex: number,
-    onItemHover: (index: number) => void,
     onItemClicked: (index: number) => void,
+    onItemDoubleClick: (index: number) => void,
 }
 
-export const ClipboardList = ({ history, selectedIndex, onItemHover, onItemClicked }: ClipboardListParams) => {
+export const ClipboardList = ({ history, selectedIndex, onItemClicked, onItemDoubleClick }: ClipboardListParams) => {
     const selectedRef = useRef<HTMLLIElement>(null);
 
     useEffect(() => {
@@ -24,23 +24,47 @@ export const ClipboardList = ({ history, selectedIndex, onItemHover, onItemClick
     }, [selectedRef, selectedIndex]);
 
     return (
-        <ul className='not-draggable flex flex-col gap-1'>
-            {history.map((item, index) => {
-                const {id} = item;
-                const isSelected = selectedIndex === index;
+        <ul className='not-draggable flex flex-col gap-1 cursor-default select-none'>
+            {
+                Object.keys(history).map((group, index  ) => {
+                    const items = history[group] ?? [];
 
-                return (
-                    <li
-                        key={id}
-                        className={`h-8 text-gray-500 flex items-center pl-1 bg-opacity-70 ${isSelected ? 'bg-gray-200' : 'bg-white'}`}
-                        ref={isSelected ? selectedRef : null}
-                        onMouseEnter={() => onItemHover(index)}
-                        onClick={() => onItemClicked(index)}
-                    >
-                        <ClipboardListItem item={item} />
-                    </li>
-                )
-            })}
+                    return (
+                        <li
+                            key={group}
+                            className='flex flex-col gap-1 justify-center items-center'
+                            style={{zIndex: index}}
+                        >
+                            <span
+                                className='h-8 w-1/2 text-gray-500 flex justify-center rounded-xl items-center bg-white bg-opacity-70 sticky position-[webkit-sticky] top-0'
+                            >
+                                {group}
+                            </span>
+
+                            <ul className='w-full flex flex-col gap-1'>
+                                {
+                                    items.map(({item}, index) => {
+                                        const {id} = item;
+                                        const isSelected = selectedIndex === index;
+
+                                        return (
+                                            <li
+                                                key={id}
+                                                className={`h-8 text-gray-500 flex items-center pl-1 bg-opacity-70 ${isSelected ? 'bg-gray-200' : 'bg-white'}`}
+                                                ref={isSelected ? selectedRef : null}
+                                                onClick={() => onItemClicked(index)}
+                                                onDoubleClick={() => onItemDoubleClick(index)}
+                                            >
+                                                <ClipboardListItem item={item}/>
+                                            </li>
+                                        )
+                                    })
+                                }
+                            </ul>
+                        </li>
+                    )
+                })
+            }
         </ul>
     )
 }

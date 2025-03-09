@@ -12,7 +12,7 @@ export type ClipboardBaseItem = {
     hash: ClipboardItemHash;
 
     // Created and updated fields
-    dateTimeCreated: number;
+    dateTimeCopied: number;
 }
 
 export type ClipboardImageBase = {
