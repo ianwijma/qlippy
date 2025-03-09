@@ -1,4 +1,3 @@
-// @ts-ignore
 import dayjs, {Dayjs} from 'dayjs'
 
 export const toHumanDateAgo = (dateTimestamp: number): string => {
@@ -19,7 +18,7 @@ export const toHumanDateAgo = (dateTimestamp: number): string => {
     } else if (differenceInWeeks > 0 && differenceInMonths <= 0) {
         return `${differenceInWeeks} weeks ago`;
     } else if (differenceInMonths > 0 && differenceInYears <= 0) {
-        return `${differenceInWeeks} months ago`;
+        return `${differenceInMonths} months ago`;
     } else if (differenceInYears > 0 && differenceInYears < 10) {
         return `${differenceInYears} years ago`;
     } else {
