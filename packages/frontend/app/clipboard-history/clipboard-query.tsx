@@ -10,6 +10,9 @@ export type ClipboardQueryParams = {
     confirmSelected: () => void,
     deleteSelected: () => void,
     close: () => void,
+    isMenuShown: boolean,
+    showMenu: () => void,
+    hideMenu: () => void,
 }
 
 export const ClipboardQuery = memo(({
@@ -21,32 +24,50 @@ export const ClipboardQuery = memo(({
                                         selectPrevious,
                                         confirmSelected,
                                         deleteSelected,
-                                        close
+                                        close,
+                                        isMenuShown,
+                                        showMenu,
+                                        hideMenu,
                                     }: ClipboardQueryParams) => {
     const handleKeyDown: KeyboardEventHandler<HTMLInputElement> = useCallback((event) => {
-        switch (event.code) {
-            case 'ArrowDown':
-                event.preventDefault();
-                selectNext();
-                break;
-            case 'ArrowUp':
-                event.preventDefault();
-                selectPrevious();
-                break;
-            case 'Enter':
-                event.preventDefault();
-                confirmSelected();
-                break;
-            case 'Escape':
-                event.preventDefault();
-                close();
-                break;
-            case 'Delete':
-                event.preventDefault();
-                deleteSelected();
-                break;
+        if (event.ctrlKey) {
+            event.preventDefault();
+            showMenu();
+            switch (event.code) {
+                case 'Delete':
+                    event.preventDefault();
+                    deleteSelected();
+                    break;
+            }
+        } else {
+            switch (event.code) {
+                case 'ArrowDown':
+                    event.preventDefault();
+                    selectNext();
+                    break;
+                case 'ArrowUp':
+                    event.preventDefault();
+                    selectPrevious();
+                    break;
+                case 'Enter':
+                    event.preventDefault();
+                    confirmSelected();
+                    break;
+                case 'Escape':
+                    event.preventDefault();
+                    close();
+                    break;
+            }
         }
-    }, [selectNext, selectPrevious, confirmSelected, close, deleteSelected]);
+    }, [selectNext, selectPrevious, confirmSelected, close, deleteSelected, showMenu]);
+
+    const handleKeyUp: KeyboardEventHandler<HTMLInputElement> = useCallback((event) => {
+        if (isMenuShown && !event.ctrlKey) {
+            event.preventDefault();
+            hideMenu();
+        }
+    }, [hideMenu, isMenuShown])
+
 
     const inputRef = useRef<HTMLInputElement>(null);
     const selectRef = useRef<HTMLSelectElement>(null);
@@ -95,6 +116,7 @@ export const ClipboardQuery = memo(({
                 value={query}
                 onChange={(e) => updateQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
+                onKeyUp={handleKeyUp}
                 className='not-draggable bg-opacity-70 bg-white text-gray-500 w-4/5 h-full px-2 rounded-tl-lg'
                 placeholder='Type to filter through entries...'
             />
