@@ -1,6 +1,5 @@
 import {ClipboardItem} from "@qlippy/common/src/settings/clipboard.settings.types";
-import {memo, useEffect, useMemo, useState} from "react";
-import {HtmlFrame} from "../../components/htmlFrame";
+import {memo, useMemo} from "react";
 
 const baseKeyCombos = {
     '': 'Shows this menu',
