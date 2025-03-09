@@ -1,4 +1,4 @@
-import {ClipboardItem, ClipboardItemTypes} from "@qlippy/common/src/settings/clipboard.settings.types";
+import {ClipboardItem} from "@qlippy/common/src/settings/clipboard.settings.types";
 import {memo} from "react";
 import {HtmlFrame} from "../../components/htmlFrame";
 
@@ -19,7 +19,7 @@ export const ClipboardDetails = memo(({item}: ClipboardDetailsParams) => {
 })
 
 const getMetadataFromType = (item: ClipboardItem) => {
-    const {type, dateTimeCreated} = item;
+    const {type, dateTimeCopied} = item;
 
     const toDate = (dateMs: number): string => {
         const date = new Date(dateMs);
@@ -50,7 +50,7 @@ const getMetadataFromType = (item: ClipboardItem) => {
     }
 
     const baseData = {
-        'Copied': toDate(dateTimeCreated),
+        'Copied': toDate(dateTimeCopied),
     }
 
     switch (type) {
@@ -175,7 +175,7 @@ const Details = ({ item }: DetailsProps) => {
     switch (type) {
         case 'text': {
             return (
-                <div>
+                <div className='text-gray-500 pl-1'>
                     {item.text}
                 </div>
             )
@@ -200,14 +200,14 @@ const Details = ({ item }: DetailsProps) => {
             }
 
             return (
-                <div>
-                    Screenshotting site...
+                <div className='text-gray-500 pl-1'>
+                    Screenshotting the site...
                 </div>
             )
         }
         case 'path': {
             return (
-                <div>
+                <div className='text-gray-500 pl-1'>
                     {item.path}
                 </div>
             )
@@ -230,14 +230,14 @@ const Details = ({ item }: DetailsProps) => {
             }
 
             return (
-                <div>
-                    Saving image...
+                <div className='text-gray-500 pl-1'>
+                    Saving the image...
                 </div>
             )
         }
         default: {
             return (
-                <div>
+                <div className='text-gray-500 pl-1'>
                     No preview available for {type}
                 </div>
             )

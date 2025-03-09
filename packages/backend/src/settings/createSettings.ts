@@ -86,7 +86,7 @@ export const createSettings = <T extends BaseSettings>({
             postUpdate = JSON.stringify(updatedSettings, null, 2);
         }
 
-        if (isDebug()) {
+        if (isDebug() && postUpdate.length < 5000) {
             const updateDiff = diff(preUpdate, postUpdate, {
                 color: true,
             });

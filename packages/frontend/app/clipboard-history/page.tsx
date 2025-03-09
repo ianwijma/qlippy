@@ -22,13 +22,17 @@ import {
     clearClipboardHistoryEventName
 } from '@qlippy/common/src/events/clearClipboardHistory.event'
 import {useWindowControls} from "../../hooks/useWindowControls";
+import {toHumanDateAgo} from '@qlippy/common/src/date'
 
 export type SearchableHistory = {
     id: ClipboardId,
     type: ClipboardItemTypes,
     text: string,
     item: ClipboardItem,
+    group: string,
 }
+
+export type SearchableGroupedHistory = Record<string, SearchableHistory[]>;
 
 export default function ClipboardHistoryPage() {
     const {close} = useWindowControls();
@@ -43,9 +47,9 @@ export default function ClipboardHistoryPage() {
 
     const searchableHistory = useMemo<SearchableHistory[]>(() => {
         return history.map((item) => {
-            const {id, type} = item;
+            const {id, type, dateTimeCopied} = item;
 
-            const base = { id, type, item };
+            const base = { id, type, item, group: toHumanDateAgo(dateTimeCopied), };
             switch (type) {
                 case 'text': return {
                     ...base,
@@ -103,14 +107,22 @@ export default function ClipboardHistoryPage() {
         });
     }, [searchableHistory, searchQuery, typeFilter]);
 
-    const filteredItems = useMemo<ClipboardItem[]>(
-        () => filteredHistory.map(({item}) => item),
-        [filteredHistory]
-    );
+    const filteredGroupedHistory = useMemo<SearchableGroupedHistory>(() => {
+        return filteredHistory.reduce((acc, item) => {
+            const {group} = item;
+            if (group in acc === false) {
+                acc[group] = []
+            }
+
+            acc[group].push(item);
+
+            return acc;
+        }, {});
+    }, [filteredHistory])
 
     const selectedItem = useMemo<ClipboardItem | undefined>(
-        () => filteredItems[selectedIndex],
-        [filteredItems, selectedIndex]
+        () => filteredHistory[selectedIndex]?.item ?? undefined,
+        [filteredHistory, selectedIndex]
     )
 
     const selectNext = useCallback(() => {
@@ -155,7 +167,7 @@ export default function ClipboardHistoryPage() {
 
     const handleClose = useCallback(() => close(), [close])
 
-    const handleHover = useCallback((index: number) => {
+    const handleClick = useCallback((index: number) => {
         if (index >= 0 && index < filteredHistory.length) {
             setSelectedIndex(index);
         } else {
@@ -163,7 +175,7 @@ export default function ClipboardHistoryPage() {
         }
     }, [setSelectedIndex, filteredHistory]);
 
-    const handleClicked = useCallback((index: number) => {
+    const handleDoubleClicked = useCallback((index: number) => {
         const item = filteredHistory[index];
 
         if (item) {
@@ -176,7 +188,7 @@ export default function ClipboardHistoryPage() {
     }, [setSelectedIndex, filteredHistory]);
 
     return (
-        <div className="draggable bg-opacity-70 bg-white rounded-xl">
+        <div className="draggable bg-opacity-70 bg-white rounded-xl select-none">
             <div className="h-screen w-screen max-w-full grid gap-2 p-2 grid-rows-[3rem_1fr] grid-cols-[2fr_3fr]">
                 <div className="col-span-2 row-span-1">
                     <ClipboardQuery
@@ -191,12 +203,12 @@ export default function ClipboardHistoryPage() {
                         close={handleClose}
                     />
                 </div>
-                <div className="row-span-1 col-span-1 overflow-y-auto overflow-x-hidden rounded-bl-lg">
+                <div className="row-span-1 col-span-1 overflow-y-auto overflow-x-hidden rounded-bl-lg relative">
                     <ClipboardList
-                        history={filteredItems}
+                        history={filteredGroupedHistory}
                         selectedIndex={selectedIndex}
-                        onItemHover={handleHover}
-                        onItemClicked={handleClicked}/>
+                        onItemClicked={handleClick}
+                        onItemDoubleClick={handleDoubleClicked}/>
                 </div>
                 <div className="row-span-1 col-span-1 overflow-y-auto overflow-x-hidden">
                     <ClipboardDetails item={selectedItem}/>
