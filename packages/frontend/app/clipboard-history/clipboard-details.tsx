@@ -123,7 +123,7 @@ const getMetadataFromType = (item: ClipboardItem) => {
         case 'image':
             return {
                 'Type': 'Image',
-                'Image size': item.size ? humanFileSize(item.size) : undefined,
+                'Image size': Number.isInteger(item.size) ? humanFileSize(item.size) : undefined,
                 'Image width': String(item.width),
                 'Image height': String(item.height),
                 ...baseData,
