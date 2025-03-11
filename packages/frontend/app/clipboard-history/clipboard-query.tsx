@@ -78,7 +78,7 @@ export const ClipboardQuery = memo(({
                     break;
             }
         }
-    }, [selectNext, selectPrevious, confirmSelected, close, deleteSelected, showMenu]);
+    }, [selectNext, selectPrevious, confirmSelected, close, deleteSelected, showMenu, hideMenu, openSelected, updateQuery]);
 
     const handleKeyUp: KeyboardEventHandler<HTMLInputElement> = useCallback((event) => {
         if (isMenuShown && !event.ctrlKey) {

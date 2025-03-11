@@ -9,34 +9,37 @@ const createClipboardHandleOpen = () => {
     return {
         initialize: async (): Promise<void> => {
             eventHandler.listen<OpenClipboardHistoryEventData>(openClipboardHistoryEventName, async ({id, action}) => {
-                console.log('openClipboardHistoryEventName', {id, action});
                 const item = clipboardManager.getById(id);
                 if (item) {
                     const {type} = item;
-                    switch (type) {
-                        case "url": {
-                            const {url, imageFilePath} = item;
-                            if (action === 'url') {
-                                await shell.openExternal(url);
-                            } else if (action === 'file') {
-                                await shell.openPath(imageFilePath);
+                    try {
+                        switch (type) {
+                            case "url": {
+                                const {url, imageFilePath} = item;
+                                if (action === 'url') {
+                                    await shell.openExternal(url);
+                                } else if (action === 'file') {
+                                    await shell.openPath(imageFilePath);
+                                }
+                                break;
                             }
-                            break;
-                        }
-                        case "image": {
-                            const {imageFilePath} = item;
-                            if (action === 'file') {
-                                await shell.openPath(imageFilePath);
+                            case "image": {
+                                const {imageFilePath} = item;
+                                if (action === 'file') {
+                                    await shell.openPath(imageFilePath);
+                                }
+                                break;
                             }
-                            break;
-                        }
-                        case "path": {
-                            const {path} = item;
-                            if (action === 'file') {
-                                await shell.openPath(path);
+                            case "path": {
+                                const {path} = item;
+                                if (action === 'file') {
+                                    await shell.openPath(path);
+                                }
+                                break;
                             }
-                            break;
                         }
+                    } catch (error) {
+                        console.error(`Failed to action "${action}" against item with type "${type}": ${JSON.stringify(item)}`, error);
                     }
                 }
             });
