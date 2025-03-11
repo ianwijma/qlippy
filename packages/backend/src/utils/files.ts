@@ -1,14 +1,12 @@
 import path from 'path';
 import fs from 'fs/promises';
 import YAML from 'yaml'
-import {isDev} from "./isDev";
 import {app} from "electron";
 import {Buffer} from "node:buffer";
 import {Stream} from "node:stream";
 import {Stats} from "node:fs";
 
-const FILES_DIR = isDev() ? '.files-dev' : '.files';
-const ROOT_DIR = path.resolve(app.getPath('userData'), FILES_DIR);
+const ROOT_DIR = path.resolve(app.getPath('userData'), '.files');
 
 const normalizeFilePath = (relativePath: string): string => {
     const resolvedPath = path.resolve(ROOT_DIR, relativePath);
