@@ -4,6 +4,19 @@ import {memo, useMemo} from "react";
 const baseKeyCombos = {
     '': 'Shows this menu',
     'Delete': 'Deletes the item',
+    'Backspace': 'Clear search query',
+}
+
+const fileKeyCombos = {
+    'f': 'Open the file externally',
+}
+
+const imageKeyCombos = {
+    'i': 'Open the image externally',
+}
+
+const urlKeyCombos = {
+    'u': 'Open the url in the default browser',
 }
 
 export type ClipboardMenuParams = {
@@ -11,9 +24,35 @@ export type ClipboardMenuParams = {
     item: ClipboardItem | undefined,
 };
 export const ClipboardMenu = memo(({show, item}: ClipboardMenuParams) => {
-    const keyCombos = useMemo(() => ({
-        ...baseKeyCombos,
-    }), [item]);
+    const keyCombos = useMemo(() => {
+        if (!item) return baseKeyCombos;
+
+        const {type} = item;
+        switch (type) {
+            case 'image': {
+                return {
+                    ...baseKeyCombos,
+                    ...imageKeyCombos,
+                }
+            }
+            case 'path': {
+                return {
+                    ...baseKeyCombos,
+                    ...fileKeyCombos,
+                }
+            }
+            case 'url': {
+                return {
+                    ...baseKeyCombos,
+                    ...urlKeyCombos,
+                    ...imageKeyCombos,
+                }
+            }
+            default: {
+                return baseKeyCombos;
+            }
+        }
+    }, [item]);
 
     return (
         <div

@@ -1,4 +1,5 @@
 import {KeyboardEventHandler, memo, useCallback, useEffect, useRef} from "react";
+import { OpenClipboardHistoryAction } from '@qlippy/common/src/events/openClipboardHistory.event'
 
 export type ClipboardQueryParams = {
     query: string;
@@ -9,6 +10,7 @@ export type ClipboardQueryParams = {
     selectPrevious: () => void,
     confirmSelected: () => void,
     deleteSelected: () => void,
+    openSelected: (action: OpenClipboardHistoryAction) => void,
     close: () => void,
     isMenuShown: boolean,
     showMenu: () => void,
@@ -24,6 +26,7 @@ export const ClipboardQuery = memo(({
                                         selectPrevious,
                                         confirmSelected,
                                         deleteSelected,
+                                        openSelected,
                                         close,
                                         isMenuShown,
                                         showMenu,
@@ -33,10 +36,26 @@ export const ClipboardQuery = memo(({
         if (event.ctrlKey) {
             event.preventDefault();
             showMenu();
+
             switch (event.code) {
                 case 'Delete':
                     event.preventDefault();
                     deleteSelected();
+                    break;
+                case 'Backspace':
+                    event.preventDefault();
+                    updateQuery('');
+                    break;
+                case 'KeyF':
+                case 'KeyI':
+                    event.preventDefault();
+                    openSelected('file');
+                    hideMenu(); // useful during development, in production focus loss closes the window
+                    break;
+                case 'KeyU':
+                    event.preventDefault();
+                    openSelected('url');
+                    hideMenu(); // useful during development, in production focus loss closes the window
                     break;
             }
         } else {

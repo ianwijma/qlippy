@@ -21,6 +21,11 @@ import {
     ClearClipboardHistoryEventData,
     clearClipboardHistoryEventName
 } from '@qlippy/common/src/events/clearClipboardHistory.event'
+import {
+    OpenClipboardHistoryAction,
+    OpenClipboardHistoryEventData,
+    openClipboardHistoryEventName
+} from '@qlippy/common/src/events/openClipboardHistory.event'
 import {useWindowControls} from "../../hooks/useWindowControls";
 import {toHumanDateAgo} from '@qlippy/common/src/date'
 import {ClipboardMenu} from "./clipboard-menu";
@@ -144,11 +149,11 @@ export default function ClipboardHistoryPage() {
     }, [filteredHistory, selectedIndex, setSelectedIndex]);
 
     const restoreSelected = useCallback(() => {
-        const searchable = filteredHistory[selectedIndex];
+        const selectedItem = filteredHistory[selectedIndex];
 
-        if (searchable) {
+        if (selectedItem) {
             eventHandler.emit<RestoreClipboardHistoryEventData>(restoreClipboardHistoryEventName, {
-                id: searchable.id
+                id: selectedItem.id
             });
         }
 
@@ -156,11 +161,24 @@ export default function ClipboardHistoryPage() {
     }, [filteredHistory, selectedIndex]);
 
     const clearSelected = useCallback(() => {
-        const searchable = filteredHistory[selectedIndex];
+        const selectedItem = filteredHistory[selectedIndex];
 
-        if (searchable) {
+        if (selectedItem) {
             eventHandler.emit<ClearClipboardHistoryEventData>(clearClipboardHistoryEventName, {
-                ids: [ searchable.id ]
+                ids: [ selectedItem.id ]
+            });
+        }
+
+        if (selectedIndex === filteredHistory.length - 1) setSelectedIndex(selectedIndex - 1);
+    }, [filteredHistory, selectedIndex, setSelectedIndex]);
+
+    const openSelected = useCallback((action: OpenClipboardHistoryAction) => {
+        const selectedItem = filteredHistory[selectedIndex];
+
+        if (selectedItem) {
+            eventHandler.emit<OpenClipboardHistoryEventData>(openClipboardHistoryEventName, {
+                id: selectedItem.id,
+                action
             });
         }
 
@@ -206,6 +224,7 @@ export default function ClipboardHistoryPage() {
                         selectPrevious={selectPrevious}
                         confirmSelected={restoreSelected}
                         deleteSelected={clearSelected}
+                        openSelected={openSelected}
                         close={handleClose}
                         isMenuShown={showMenu}
                         showMenu={handleShowMenu}

@@ -15,6 +15,7 @@ import {clipboardHandleClear} from "./clipboard/handle-clear";
 import {clipboardHandleRestore} from "./clipboard/handle-restore";
 import {clipboardChangeEmitter} from "./clipboard/change-emitter";
 import {clipboardSettings} from "./settings/clipboard.setting";
+import {clipboardHandleOpen} from "./clipboard/handle-open";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -47,6 +48,7 @@ if (!isSingleInstance) {
         await clipboardHandleChange.initialize();
         await clipboardHandleClear.initialize();
         await clipboardHandleRestore.initialize();
+        await clipboardHandleOpen.initialize();
 
         // Background Processes
         await keyboardShortcuts.initialize();
