@@ -14,6 +14,7 @@ export type ClipboardListParams = {
 
 export const ClipboardList = ({ history, selectedIndex, onItemClicked, onItemDoubleClick }: ClipboardListParams) => {
     const selectedRef = useRef<HTMLLIElement>(null);
+    const indexRef = useRef<number>(0);
 
     useEffect(() => {
         const selectedEl = selectedRef.current;
@@ -22,6 +23,8 @@ export const ClipboardList = ({ history, selectedIndex, onItemClicked, onItemDou
 
         selectedEl.scrollIntoView({block: 'nearest'});
     }, [selectedRef, selectedIndex]);
+
+    indexRef.current = 0
 
     return (
         <ul className='not-draggable flex flex-col gap-1 cursor-default'>
@@ -45,15 +48,16 @@ export const ClipboardList = ({ history, selectedIndex, onItemClicked, onItemDou
                                 {
                                     items.map(({item}, index) => {
                                         const {id} = item;
-                                        const isSelected = selectedIndex === index;
+                                        const currentIndex = indexRef.current++;
+                                        const isSelected = selectedIndex === currentIndex;
 
                                         return (
                                             <li
                                                 key={id}
                                                 className={`h-8 text-gray-500 flex items-center pl-1 bg-opacity-70 ${isSelected ? 'bg-gray-200' : 'bg-white'}`}
                                                 ref={isSelected ? selectedRef : null}
-                                                onClick={() => onItemClicked(index)}
-                                                onDoubleClick={() => onItemDoubleClick(index)}
+                                                onClick={() => onItemClicked(currentIndex)}
+                                                onDoubleClick={() => onItemDoubleClick(currentIndex)}
                                             >
                                                 <ClipboardListItem item={item}/>
                                             </li>

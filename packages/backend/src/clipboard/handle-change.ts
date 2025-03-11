@@ -17,6 +17,7 @@ import {clipboardManager} from "./manager";
 import { join as pathJoin } from 'node:path'
 import {fileExists, fileStats, UNSAFE_fileStats, writeFile} from "../utils/files";
 import {screenshotUrl} from "../utils/screenshotSite";
+import {sha1} from "../utils/crypto";
 
 const CLIPBOARD_STORAGE_PATH = 'clipboard-files';
 
@@ -40,6 +41,11 @@ const createClipboardHandleChange = () => {
 
                     const item = nativeImageToImageClipboardItem({ image, hash: imageHash });
                     await clipboardManager.add(item);
+
+                    // If there is already an imageFilePath, we don't need to safe it again
+                    if (item.imageFilePath) {
+                        return; // is handled
+                    }
 
                     // Save file & update the clipboard item.
                     const filePath = pathJoin(CLIPBOARD_STORAGE_PATH, `${item.id}.png`);
@@ -96,22 +102,31 @@ const createClipboardHandleChange = () => {
 
                 // Text check we're checking if it contains a valid URL.
                 const url = isTextAUrl(text.trim());
-                if (!isTextEmpty && url && isHashDifferent('url', textHash)) {
-                    updateHash('url', textHash);
+                if (!isTextEmpty && url) {
+                    // Using the url.toString functionality to ensure a more stable URL string
+                    const urlHash = sha1(url.toString());
+                    if (isHashDifferent('url', urlHash)) {
+                        updateHash('url', urlHash);
 
-                    const item = textToUrlClipboardItem({ text, url, hash: textHash });
-                    await clipboardManager.add(item);
+                        const item = textToUrlClipboardItem({ text, url, hash: urlHash });
+                        await clipboardManager.add(item);
 
-                    // Screenshot the time and save it to the item
-                    const filePath = pathJoin(CLIPBOARD_STORAGE_PATH, `${item.id}.png`);
-                    let fileStoragePath = await fileExists(filePath);
-                    if (fileStoragePath === false) {
-                        const screenshotPng = await screenshotUrl.screenshot({ url, type: 'png' });
-                        item.imageFilePath = await writeFile(filePath, screenshotPng);
-                        await clipboardManager.update(item);
+                        // If there is already an imageFilePath, we don't need to safe it again
+                        if (item.imageFilePath) {
+                            return; // is handled
+                        }
+
+                        // Screenshot the time and save it to the item
+                        const filePath = pathJoin(CLIPBOARD_STORAGE_PATH, `${item.id}.png`);
+                        let fileStoragePath = await fileExists(filePath);
+                        if (fileStoragePath === false) {
+                            const screenshotPng = await screenshotUrl.screenshot({ url, type: 'png' });
+                            item.imageFilePath = await writeFile(filePath, screenshotPng);
+                            await clipboardManager.update(item);
+                        }
+
+                        return; // is handled
                     }
-
-                    return; // is handled
                 }
 
                 // Text check we're checking if is not empty.
