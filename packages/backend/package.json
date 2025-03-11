@@ -1,7 +1,7 @@
 {
   "name": "qlippy",
   "productName": "qlippy",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "description": "Qlip that!",
   "main": ".webpack/main",
   "scripts": {
