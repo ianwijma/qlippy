@@ -77,18 +77,6 @@ const createClipboardHandleChange = () => {
                     return; // is handled
                 }
 
-                const { html, htmlHash, isHtmlEmpty } = data;
-
-                // We're getting the HTML, as HTML also contains the text in the HTML.
-                if (!isHtmlEmpty && isHashDifferent('html', htmlHash)) {
-                    updateHash('html', htmlHash);
-
-                    const item = htmlToHtmlClipboardItem({ html, htmlText: text, hash: htmlHash });
-                    await clipboardManager.add(item);
-
-                    return; // is handled
-                }
-
                 // Text check we're checking if it contains a local path.
                 const stats = await UNSAFE_fileStats(text.trim());
                 if (!isTextEmpty && stats && isHashDifferent('path', textHash)) {
@@ -127,6 +115,18 @@ const createClipboardHandleChange = () => {
 
                         return; // is handled
                     }
+                }
+
+                const { html, htmlHash, isHtmlEmpty } = data;
+
+                // We're getting the HTML, as HTML also contains the text in the HTML.
+                if (!isHtmlEmpty && isHashDifferent('html', htmlHash)) {
+                    updateHash('html', htmlHash);
+
+                    const item = htmlToHtmlClipboardItem({ html, htmlText: text, hash: htmlHash });
+                    await clipboardManager.add(item);
+
+                    return; // is handled
                 }
 
                 // Text check we're checking if is not empty.

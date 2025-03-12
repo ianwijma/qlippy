@@ -14,9 +14,11 @@ export const fileProtocol = (() => {
                 try {
                     const { pathname } = new URL(request.url);
 
-                    ensureSafeFilePath(pathname);
+                    const decodePathname = decodeURI(pathname);
 
-                    return new Response(await readFile(pathname));
+                    ensureSafeFilePath(decodePathname);
+
+                    return new Response(await readFile(decodePathname));
                 } catch (error) {
                     // Handle the error as needed
                     console.error(error);

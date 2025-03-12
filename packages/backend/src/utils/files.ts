@@ -11,13 +11,11 @@ const ROOT_DIR = path.resolve(app.getPath('userData'), '.files');
 const normalizeFilePath = (relativePath: string): string => {
     const resolvedPath = path.resolve(ROOT_DIR, relativePath);
 
-    const normalizePath = path.normalize(resolvedPath);
+    const normalizedPath = path.normalize(resolvedPath);
 
-    if (!normalizePath.startsWith(ROOT_DIR)) {
-        throw new Error(`Path "${relativePath}" tried to get outside our own directory, this is NOT allowed.`);
-    }
+    ensureSafeFilePath(normalizedPath);
 
-    return normalizePath;
+    return normalizedPath;
 }
 
 export const ensureSafeFilePath = (absolutePath: string): void => {
