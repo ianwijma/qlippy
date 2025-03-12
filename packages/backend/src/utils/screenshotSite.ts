@@ -22,7 +22,7 @@ const createScreenshotUrl = () => {
             try {
                 await page.waitForNetworkIdle({idleTime: 250, timeout: 1000 * 10 /* ms > s */ });
             } catch (error) {
-                console.error('Screenshot timed out', {error});
+                console.error('Screenshot timed out');
             }
 
             try {
