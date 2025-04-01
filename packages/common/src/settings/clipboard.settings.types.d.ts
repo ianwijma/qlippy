@@ -13,6 +13,9 @@ export type ClipboardBaseItem = {
 
     // Created and updated fields
     dateTimeCopied: number;
+
+    // If the item is pinned or not;
+    pinned: boolean;
 }
 
 export type ClipboardImageBase = {

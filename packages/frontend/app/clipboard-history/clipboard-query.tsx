@@ -11,10 +11,24 @@ export type ClipboardQueryParams = {
     confirmSelected: () => void,
     deleteSelected: () => void,
     openSelected: (action: OpenClipboardHistoryAction) => void,
+    pinSelected: () => void,
     close: () => void,
     isMenuShown: boolean,
     showMenu: () => void,
     hideMenu: () => void,
+}
+
+const tips = [
+    'Type to filter through entries...',
+    'You can switch between the input field and the type filter using tab...',
+    'You can change the type filter using the up and down arrows when it\'s highlighted...',
+    'Holding CTRL shows you the actions for the current highlighted item...',
+    'Each item has it\'s own actions...',
+];
+
+const getRandomTip = () => {
+    const randomIndex = Math.floor(Math.random() * tips.length);
+    return tips[randomIndex];
 }
 
 export const ClipboardQuery = memo(({
@@ -27,6 +41,7 @@ export const ClipboardQuery = memo(({
                                         confirmSelected,
                                         deleteSelected,
                                         openSelected,
+                                        pinSelected,
                                         close,
                                         isMenuShown,
                                         showMenu,
@@ -44,7 +59,7 @@ export const ClipboardQuery = memo(({
                     break;
                 case 'Backspace':
                     event.preventDefault();
-                    updateQuery('');
+                    query.length > 0 && updateQuery('');
                     break;
                 case 'KeyF':
                 case 'KeyI':
@@ -55,6 +70,11 @@ export const ClipboardQuery = memo(({
                 case 'KeyU':
                     event.preventDefault();
                     openSelected('url');
+                    hideMenu(); // useful during development, in production focus loss closes the window
+                    break;
+                case 'KeyP':
+                    event.preventDefault();
+                    pinSelected();
                     hideMenu(); // useful during development, in production focus loss closes the window
                     break;
             }
@@ -137,7 +157,7 @@ export const ClipboardQuery = memo(({
                 onKeyDown={handleKeyDown}
                 onKeyUp={handleKeyUp}
                 className='not-draggable bg-opacity-70 bg-white text-gray-500 w-4/5 h-full px-2 rounded-tl-lg'
-                placeholder='Type to filter through entries...'
+                placeholder={getRandomTip()}
             />
             <select
                 ref={selectRef}

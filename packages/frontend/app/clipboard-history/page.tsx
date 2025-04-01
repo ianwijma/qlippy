@@ -3,7 +3,7 @@
 import {ClipboardQuery} from "./clipboard-query";
 import {ClipboardList} from "./clipboard-list";
 import {ClipboardDetails} from "./clipboard-details";
-import {useCallback, useMemo, useState} from "react";
+import {useCallback, useMemo, useRef, useState} from "react";
 import {useSettings} from "../../hooks/useSettings";
 import {
     ClipboardHistory,
@@ -29,6 +29,7 @@ import {
 import {useWindowControls} from "../../hooks/useWindowControls";
 import {toHumanDateAgo} from '@qlippy/common/src/date'
 import {ClipboardMenu} from "./clipboard-menu";
+import {DefaultWindowContainer} from "../../components/windowContainer/DefaultWindowContainer";
 
 export type SearchableHistory = {
     id: ClipboardId,
@@ -42,21 +43,37 @@ export type SearchableGroupedHistory = Record<string, SearchableHistory[]>;
 
 export default function ClipboardHistoryPage() {
     const {close} = useWindowControls();
+    const amountOfPinnedItems = useRef(0);
     const [showMenu, setShowMenu] = useState<boolean>(false);
     const [query, setQuery] = useState<string>('');
     const [typeFilter, setTypeFilter] = useState<'' | ClipboardItemTypes>('');
     const [selectedIndex, setSelectedIndex] = useState<number>(0);
-    const {isLoading, settings} = useSettings<ClipboardSettings>('clipboard');
+    const {isLoading, settings, updateSettings} = useSettings<ClipboardSettings>('clipboard');
+
+    const updateQuery = useCallback((query: string) => {
+        setQuery(query);
+        setSelectedIndex(0);
+    }, [setQuery, setSelectedIndex]);
+
+    const updateTypeFilter = useCallback((type: '' | ClipboardItemTypes) => {
+        setTypeFilter(type);
+        setSelectedIndex(0);
+    }, [setTypeFilter, setSelectedIndex]);
 
     const {history} = useMemo<{history: ClipboardHistory,}>(() => ({
         history: isLoading ? [] as ClipboardHistory : settings.history,
     }), [isLoading, settings]);
 
     const searchableHistory = useMemo<SearchableHistory[]>(() => {
+        amountOfPinnedItems.current = 0;
         return history.map((item) => {
-            const {id, type, dateTimeCopied} = item;
+            const {id, type, dateTimeCopied, pinned} = item;
 
-            const base = { id, type, item, group: toHumanDateAgo(dateTimeCopied), };
+            if (pinned) {
+                amountOfPinnedItems.current++;
+            }
+
+            const base = { id, type, item, group: pinned ? 'Pinned' : toHumanDateAgo(dateTimeCopied), };
             switch (type) {
                 case 'text': return {
                     ...base,
@@ -91,16 +108,6 @@ export default function ClipboardHistoryPage() {
         }).filter(Boolean);
     }, [history]);
 
-    const updateQuery = useCallback((query: string) => {
-        setQuery(query);
-        setSelectedIndex(0);
-    }, [setQuery, setSelectedIndex]);
-
-    const updateTypeFilter = useCallback((type: '' | ClipboardItemTypes) => {
-        setTypeFilter(type);
-        setSelectedIndex(0);
-    }, [setTypeFilter, setSelectedIndex]);
-
     const searchQuery = useMemo(() => query.toLowerCase(), [query]);
 
     const filteredHistory = useMemo<SearchableHistory[]>(() => {
@@ -124,33 +131,48 @@ export default function ClipboardHistoryPage() {
             acc[group].push(item);
 
             return acc;
-        }, {});
-    }, [filteredHistory])
+        }, amountOfPinnedItems.current > 0 ? {'Pinned': []} : {});
+    }, [filteredHistory]);
+
+    const getSearchableHistoryByIndex= useCallback((index: number): SearchableHistory | undefined => {
+        let currentIndex = 0;
+        return Object.keys(filteredGroupedHistory).reduce((acc, group) => {
+            const searchableHistories = filteredGroupedHistory[group];
+
+            searchableHistories.forEach((searchableHistory) => {
+                if (currentIndex === index) {
+                    acc = searchableHistory;
+                }
+
+                currentIndex++;
+            })
+
+            return acc;
+        }, undefined as SearchableHistory | undefined);
+    }, [filteredGroupedHistory])
 
     const selectedItem = useMemo<ClipboardItem | undefined>(
-        () => filteredHistory[selectedIndex]?.item ?? undefined,
-        [filteredHistory, selectedIndex]
+        () => getSearchableHistoryByIndex(selectedIndex)?.item ?? undefined,
+        [getSearchableHistoryByIndex, selectedIndex]
     )
 
     const selectNext = useCallback(() => {
         const newSelectedIndex = selectedIndex + 1;
-        const hasNext = !!filteredHistory[newSelectedIndex];
+        const hasNext = !!getSearchableHistoryByIndex(newSelectedIndex);
         if (hasNext) {
             setSelectedIndex(newSelectedIndex);
         }
-    }, [filteredHistory, selectedIndex, setSelectedIndex]);
+    }, [getSearchableHistoryByIndex, selectedIndex, setSelectedIndex]);
 
     const selectPrevious = useCallback(() => {
         const newSelectedIndex = selectedIndex - 1;
-        const hasPrevious = !!filteredHistory[newSelectedIndex];
+        const hasPrevious = !!getSearchableHistoryByIndex(newSelectedIndex);
         if (hasPrevious) {
             setSelectedIndex(newSelectedIndex);
         }
-    }, [filteredHistory, selectedIndex, setSelectedIndex]);
+    }, [getSearchableHistoryByIndex, selectedIndex, setSelectedIndex]);
 
     const restoreSelected = useCallback(() => {
-        const selectedItem = filteredHistory[selectedIndex];
-
         if (selectedItem) {
             eventHandler.emit<RestoreClipboardHistoryEventData>(restoreClipboardHistoryEventName, {
                 id: selectedItem.id
@@ -158,11 +180,9 @@ export default function ClipboardHistoryPage() {
         }
 
         close();
-    }, [filteredHistory, selectedIndex]);
+    }, [selectedItem]);
 
     const clearSelected = useCallback(() => {
-        const selectedItem = filteredHistory[selectedIndex];
-
         if (selectedItem) {
             eventHandler.emit<ClearClipboardHistoryEventData>(clearClipboardHistoryEventName, {
                 ids: [ selectedItem.id ]
@@ -170,11 +190,9 @@ export default function ClipboardHistoryPage() {
         }
 
         if (selectedIndex === filteredHistory.length - 1) setSelectedIndex(selectedIndex - 1);
-    }, [filteredHistory, selectedIndex, setSelectedIndex]);
+    }, [selectedItem, setSelectedIndex]);
 
     const openSelected = useCallback((action: OpenClipboardHistoryAction) => {
-        const selectedItem = filteredHistory[selectedIndex];
-
         if (selectedItem) {
             eventHandler.emit<OpenClipboardHistoryEventData>(openClipboardHistoryEventName, {
                 id: selectedItem.id,
@@ -183,7 +201,26 @@ export default function ClipboardHistoryPage() {
         }
 
         if (selectedIndex === filteredHistory.length - 1) setSelectedIndex(selectedIndex - 1);
-    }, [filteredHistory, selectedIndex, setSelectedIndex]);
+    }, [selectedItem, setSelectedIndex]);
+
+    const pinSelected = useCallback(() => {
+        const {history} = settings;
+
+        updateSettings({
+            ...settings,
+            history: history.map((item) => {
+                if (item.id === selectedItem.id) {
+                    item.pinned = !item.pinned;
+                }
+
+                return item;
+            })
+        });
+
+        setQuery('');
+        setTypeFilter('');
+        setSelectedIndex(0);
+    }, [selectedItem, settings, updateSettings]);
 
     const handleClose = useCallback(() => close(), [close])
 
@@ -196,7 +233,7 @@ export default function ClipboardHistoryPage() {
     }, [setSelectedIndex, filteredHistory]);
 
     const handleDoubleClicked = useCallback((index: number) => {
-        const item = filteredHistory[index];
+        const item = getSearchableHistoryByIndex(index);
 
         if (item) {
             eventHandler.emit<RestoreClipboardHistoryEventData>(restoreClipboardHistoryEventName, {
@@ -205,13 +242,13 @@ export default function ClipboardHistoryPage() {
         }
 
         close();
-    }, [setSelectedIndex, filteredHistory]);
+    }, [setSelectedIndex, getSearchableHistoryByIndex]);
 
     const handleShowMenu = useCallback(() => setShowMenu(true), [setShowMenu]);
     const handleHideMenu = useCallback(() => setShowMenu(false), [setShowMenu]);
 
     return (
-        <div className="draggable bg-opacity-70 bg-white rounded-xl select-none relative overflow-clip">
+        <DefaultWindowContainer hideTitleBar title='Qlippy' className="draggable bg-opacity-70 bg-white rounded-xl select-none relative overflow-clip">
             <ClipboardMenu show={showMenu} item={selectedItem} />
             <div className="h-screen w-screen max-w-full grid gap-2 p-2 grid-rows-[3rem_1fr] grid-cols-[2fr_3fr]">
                 <div className="col-span-2 row-span-1">
@@ -225,13 +262,14 @@ export default function ClipboardHistoryPage() {
                         confirmSelected={restoreSelected}
                         deleteSelected={clearSelected}
                         openSelected={openSelected}
+                        pinSelected={pinSelected}
                         close={handleClose}
                         isMenuShown={showMenu}
                         showMenu={handleShowMenu}
                         hideMenu={handleHideMenu}
                     />
                 </div>
-                <div className="row-span-1 col-span-1 overflow-y-auto overflow-x-hidden rounded-bl-lg relative">
+                <div className="row-span-1 col-span-1 overflow-y-auto overflow-x-hidden rounded-bl-lg relative cursor-default not-draggable">
                     <ClipboardList
                         history={filteredGroupedHistory}
                         selectedIndex={selectedIndex}
@@ -242,6 +280,6 @@ export default function ClipboardHistoryPage() {
                     <ClipboardDetails item={selectedItem}/>
                 </div>
             </div>
-        </div>
+        </DefaultWindowContainer>
     )
 }

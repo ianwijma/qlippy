@@ -3,8 +3,7 @@
   "description": "Qlip That!",
   "author": {
     "name": "Ian Wijma",
-    "url": "https://ian.wij.ma/",
-    "email": ""
+    "url": "https://ian.wij.ma/"
   },
   "license": "",
   "workspaces": [

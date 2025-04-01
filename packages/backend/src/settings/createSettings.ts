@@ -1,5 +1,5 @@
 import {fileExists, readYamlFile, writeYamlFile} from "../utils/files";
-import {BaseSettings} from "@qlippy/common/src/settings.types";
+import {BaseSettings, SettingsVersion} from "@qlippy/common/src/settings.types";
 import {responseHandler} from "../utils/responseHandler";
 import {eventHandler} from "../utils/eventHandler";
 import {settingsUpdatedEventName, type SettingsUpdatedEventData} from '@qlippy/common/src/events/settingsUpdated.event'
@@ -14,14 +14,36 @@ import {isDebug} from "../utils/isDebug";
 
 export type SettingsName = string;
 
-type CreateSettingParams<T> = {
+export type MigrationType<T extends BaseSettings> = {
+    fromVersion: SettingsVersion,
+    toVersion: SettingsVersion,
+    migrateFunction: (settings: T) => Promise<T>,
+}
+
+export type MigrationObjectType<T extends BaseSettings> = Record<SettingsVersion, MigrationType<T>>;
+export type MigrationArrayType<T extends BaseSettings> = MigrationType<T>[];
+
+export const toMigrations = <T extends BaseSettings>(input: MigrationArrayType<T>): MigrationObjectType<T> => {
+    return input.reduce((acc, migration) => {
+        const {fromVersion} = migration;
+
+        if (fromVersion in acc) throw new Error(`Migration with fromVersion "${fromVersion}" was already declared`);
+
+        acc[fromVersion] = migration;
+
+        return acc;
+    }, {} as MigrationObjectType<T>)
+}
+
+type CreateSettingParams<T extends BaseSettings> = {
     name: SettingsName;
     defaultSettings: Omit<T, "name">;
     preSaveFn?: (data: T) => Promise<T> | T;
     postLoadFn?: (data: T) => Promise<T> | T;
+    migrations?: MigrationObjectType<T>;
 }
 
-export type CreateSettingReturn<T> = {
+export type CreateSettingReturn<T extends BaseSettings> = {
     name: SettingsName;
     initialize: () => Promise<void>;
     getSettings: () => T;
@@ -35,6 +57,7 @@ export const createSettings = <T extends BaseSettings>({
                                                            defaultSettings,
                                                            preSaveFn = (data) => data,
                                                            postLoadFn = (data) => data,
+                                                           migrations = {},
                                                        }: CreateSettingParams<T>): CreateSettingReturn<T> => {
     const actuallyDefaultSettings: T = {name, ...defaultSettings} as T;
     const settingsFilePath = `settings/${name}.yaml`;
@@ -48,9 +71,13 @@ export const createSettings = <T extends BaseSettings>({
         console.info(`Initializing ${name} settings`);
 
         await syncSettings();
+
+        await performMigration();
+
+        await setupListeners();
     }
 
-    const getSettings = () => {
+    const getSettings = (): T => {
         isInitialized();
 
         return JSON.parse(JSON.stringify(settingsCache));
@@ -67,7 +94,49 @@ export const createSettings = <T extends BaseSettings>({
         settingsCache = await postLoadFn(settings);
     }
 
-    const updateSettings = async (settingToUpdate: T): Promise<T> => {
+    const setupListeners = async () => {
+        responseHandler.handleResponse<SettingsRequestReq, SettingsRequestRes<T>>(settingsRequestName, (request) => {
+            const {settingsName: currentSettingsName} = request;
+
+            return currentSettingsName === name;
+        }, () => {
+            return getSettings();
+        });
+
+        eventHandler.listen<UpdateSettingsEventData<T>>(updateSettingsEventName, (event) => {
+            const {settingsName, settingsToUpdate} = event;
+
+            if (settingsName !== name) return;
+
+            updateSettings(settingsToUpdate);
+        })
+    };
+
+    const performMigration = async () => {
+        let currentSettings = getSettings();
+
+        while (currentSettings.version in migrations) {
+            const migration = migrations[currentSettings.version];
+            const {fromVersion, toVersion, migrateFunction} = migration;
+
+            console.time(`Migrating ${name} settings from ${fromVersion} to ${toVersion}`);
+            const migratedSettings = await migrateFunction(currentSettings);
+            console.timeEnd(`Migrating ${name} settings from ${fromVersion} to ${toVersion}`);
+
+            // Ensure the version is bumped correctly.
+            migratedSettings.version = toVersion;
+
+            await updateSettings(migratedSettings, { emitEvents: false });
+
+            currentSettings = getSettings();
+        }
+    };
+
+    type UpdateSettingsConfig = {
+        emitEvents?: boolean
+    }
+
+    const updateSettings = async (settingToUpdate: T, config: UpdateSettingsConfig = {emitEvents: true}): Promise<T> => {
         let preUpdate = '';
         if (isDebug()) {
             preUpdate = JSON.stringify(getSettings(), null, 2);
@@ -93,11 +162,13 @@ export const createSettings = <T extends BaseSettings>({
             console.log(updateDiff);
         }
 
-        eventHandler.emit<SettingsUpdatedEventData<T>>(settingsUpdatedEventName, {
-            settingName: name,
-            updatedSettings,
-            type: 'update',
-        });
+        if (config.emitEvents) {
+            eventHandler.emit<SettingsUpdatedEventData<T>>(settingsUpdatedEventName, {
+                settingName: name,
+                updatedSettings,
+                type: 'update',
+            });
+        }
 
         return updatedSettings;
     }
@@ -119,22 +190,6 @@ export const createSettings = <T extends BaseSettings>({
 
         return resettedSettings;
     }
-
-    responseHandler.handleResponse<SettingsRequestReq, SettingsRequestRes<T>>(settingsRequestName, (request) => {
-        const {settingsName: currentSettingsName} = request;
-
-        return currentSettingsName === name;
-    }, () => {
-        return getSettings();
-    });
-
-    eventHandler.listen<UpdateSettingsEventData<T>>(updateSettingsEventName, (event) => {
-        const {settingsName, settingsToUpdate} = event;
-
-        if (settingsName !== name) return;
-
-        updateSettings(settingsToUpdate);
-    })
 
     return {
         name,

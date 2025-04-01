@@ -8,4 +8,5 @@ export const aboutWindow = createWindow({
     minWidth: 690,
     minHeight: 180,
     resizable: false,
+    transparent: true,
 });

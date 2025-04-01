@@ -19,6 +19,7 @@ const getBase = ({hash}: GetBaseProps): ClipboardBaseItem => ({
     id: nanoid(),
     hash,
     dateTimeCopied: Date.now(),
+    pinned: false,
 });
 
 type ConverterType<Base extends Record<string, any>> = Base & {

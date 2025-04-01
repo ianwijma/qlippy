@@ -7,6 +7,14 @@ const baseKeyCombos = {
     'Backspace': 'Clear search query',
 }
 
+const pinKeyCombos = {
+    'p': 'Pin the item'
+}
+
+const unpinKeyCombos = {
+    'p': 'Unpin the item'
+}
+
 const fileKeyCombos = {
     'f': 'Open the file externally',
 }
@@ -27,29 +35,37 @@ export const ClipboardMenu = memo(({show, item}: ClipboardMenuParams) => {
     const keyCombos = useMemo(() => {
         if (!item) return baseKeyCombos;
 
+        const getPinKeyCombos = () => item.pinned ? unpinKeyCombos : pinKeyCombos;
+
         const {type} = item;
         switch (type) {
             case 'image': {
                 return {
                     ...baseKeyCombos,
+                    ...getPinKeyCombos(),
                     ...imageKeyCombos,
                 }
             }
             case 'path': {
                 return {
                     ...baseKeyCombos,
+                    ...getPinKeyCombos(),
                     ...fileKeyCombos,
                 }
             }
             case 'url': {
                 return {
                     ...baseKeyCombos,
+                    ...getPinKeyCombos(),
                     ...urlKeyCombos,
                     ...imageKeyCombos,
                 }
             }
             default: {
-                return baseKeyCombos;
+                return {
+                    ...baseKeyCombos,
+                    ...getPinKeyCombos(),
+                };
             }
         }
     }, [item]);

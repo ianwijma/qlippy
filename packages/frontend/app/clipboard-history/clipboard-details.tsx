@@ -19,7 +19,7 @@ export const ClipboardDetails = memo(({item}: ClipboardDetailsParams) => {
 })
 
 const getMetadataFromType = (item: ClipboardItem) => {
-    const {type, dateTimeCopied} = item;
+    const {type, dateTimeCopied, pinned} = item;
 
     const toDate = (dateMs: number): string => {
         const date = new Date(dateMs);
@@ -51,6 +51,7 @@ const getMetadataFromType = (item: ClipboardItem) => {
 
     const baseData = {
         'Copied': toDate(dateTimeCopied),
+        'Pinned': pinned ? 'Yes' : 'No',
     }
 
     switch (type) {

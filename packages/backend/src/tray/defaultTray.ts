@@ -10,6 +10,7 @@ export const defaultTray = {
         console.info('Initializing default tray');
         const icon = nativeImage.createFromDataURL(defaultLogo)
         const tray = new Tray(icon);
+
         tray.setToolTip('Qlippy');
 
         let devItems: MenuItemConstructorOptions[] = [
@@ -17,7 +18,7 @@ export const defaultTray = {
                 type: 'separator',
             },
             {
-                label: 'Reset Settings',
+                label: 'Reset',
                 type: 'normal',
                 click: () => resetAllSettings()
             },
@@ -25,7 +26,7 @@ export const defaultTray = {
 
         const contextMenu = Menu.buildFromTemplate([
             {
-                label: 'Toggle clipboard history',
+                label: 'Show',
                 type: 'normal',
                 click: () => clipboardHistoryWindow.toggle()
             },
@@ -39,7 +40,7 @@ export const defaultTray = {
                 type: 'separator',
             },
             {
-                label: 'Quit Qlippy',
+                label: 'Quit',
                 type: 'normal',
                 click: () => app.quit()
             },

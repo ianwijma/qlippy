@@ -6,8 +6,10 @@ import Head from "next/head";
 
 type DefaultWindowContainerProps = PropsWithChildren & {
     title: string;
+    className?: string;
     showMinimize?: boolean;
     showClose?: boolean;
+    hideTitleBar?: boolean;
     onMinimizeClicked?: () => void;
     onCloseClicked?: () => void;
 };
@@ -15,17 +17,21 @@ type DefaultWindowContainerProps = PropsWithChildren & {
 export const DefaultWindowContainer = ({
                                            children,
                                            title,
+                                           className = '',
                                            showMinimize,
                                            showClose,
+                                           hideTitleBar = false,
                                            onMinimizeClicked,
-                                           onCloseClicked
+                                           onCloseClicked,
                                        }: DefaultWindowContainerProps) => {
-    return <div className='w-screen h-screen flex flex-col overflow-hidden'>
+    return <div className='w-screen h-screen flex flex-col overflow-hidden rounded-xl'>
         <Head>
             <title>{title}</title>
         </Head>
-        <TitleBar {...{showMinimize, showClose, onMinimizeClicked, onCloseClicked}}>{title}</TitleBar>
-        <div className='flex flex-col bg-slate-700 h-full py-1 px-1 overflow-x-auto whitespace-nowrap'>
+        {
+            hideTitleBar ? '' : <TitleBar {...{showMinimize, showClose, onMinimizeClicked, onCloseClicked}}>{title}</TitleBar>
+        }
+        <div className={className}>
             {children}
         </div>
     </div>
