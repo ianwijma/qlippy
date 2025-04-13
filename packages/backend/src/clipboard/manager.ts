@@ -6,7 +6,7 @@ import {clipboardSettings} from "../settings/clipboard.setting";
 import {readFile, removeFile} from "../utils/files";
 import {clipboard, nativeImage} from "electron";
 
-const CLIPBOARD_AMOUNT_LIMIT = 1000;
+const CLIPBOARD_AMOUNT_LIMIT = 10_000;
 
 const createClipboardManager = () => {
     const removeItemFromHistory = async ({item, history}: {item: ClipboardItem, history: ClipboardItem[]}): Promise<ClipboardItem[]> => {
