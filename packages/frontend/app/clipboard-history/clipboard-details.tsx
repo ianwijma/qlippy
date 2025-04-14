@@ -27,6 +27,14 @@ const getMetadataFromType = (item: ClipboardItem) => {
         return `${date.toLocaleDateString()} - ${date.toLocaleTimeString()}`;
     }
 
+    const toDifference = (from: number, to: number): string | undefined => {
+        if (from && to) {
+            return `${to-from}ms`
+        }
+
+        return undefined;
+    }
+
     function humanFileSize(bytes: number, useMetrics: boolean = false, rounding: number = 1) {
         const thresh = useMetrics ? 1000 : 1024;
 
@@ -80,6 +88,8 @@ const getMetadataFromType = (item: ClipboardItem) => {
                 "Url path": item.pathname,
                 "Url hash": item.hash,
                 "Url query": item.searchParams,
+                "Screenshot size": Number.isInteger(item.size) ? humanFileSize(item.size) : undefined,
+                "Screenshot duration": toDifference(item.screenshotStart, item.screenshotEnd),
                 ...baseData,
             };
         case 'path': {
@@ -103,7 +113,7 @@ const getMetadataFromType = (item: ClipboardItem) => {
             if (item.isFile) {
                 return {
                     ...defaultFirstData,
-                    'Size': humanFileSize(item.size),
+                    'Size': Number.isInteger(item.size) ? humanFileSize(item.size) : undefined,
                     ...defaultRestData,
                     ...baseData,
                 }
@@ -146,6 +156,8 @@ const Metadata = ({ item }: MetadataProps) => {
             {Object.keys(metadata).map(key => {
                 const value: string | any = metadata[key];
 
+                if (!value || JSON.stringify(value) === '{}') return '';
+
                 return (
                     <li key={key} className="truncate">
                         {key}: {
@@ -153,6 +165,9 @@ const Metadata = ({ item }: MetadataProps) => {
                             <ul className='ml-3'>
                                 {Object.keys(value).map((subKey: string) => {
                                     const subValue = value[subKey];
+
+                                    if (!value) return '';
+
                                     return (
                                         <li key={subKey}>
                                             {subKey}: {subValue}

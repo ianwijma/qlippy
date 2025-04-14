@@ -55,6 +55,7 @@ const createClipboardHandleChange = () => {
                         item.imageFilePath = await writeFile(filePath, imagePng);
                         await clipboardManager.update(item);
 
+                        // Get the image size
                         const imageStats = await fileStats(filePath);
                         if (imageStats !== false) {
                             item.size = imageStats.size;
@@ -108,9 +109,18 @@ const createClipboardHandleChange = () => {
                         const filePath = pathJoin(CLIPBOARD_STORAGE_PATH, `${item.id}.png`);
                         let fileStoragePath = await fileExists(filePath);
                         if (fileStoragePath === false) {
+                            item.screenshotStart = Date.now();
                             const screenshotPng = await screenshotUrl.screenshot({ url, type: 'png' });
                             item.imageFilePath = await writeFile(filePath, screenshotPng);
+                            item.screenshotEnd = Date.now();
                             await clipboardManager.update(item);
+
+                            // Get the screenshot size
+                            const imageStats = await fileStats(filePath);
+                            if (imageStats !== false) {
+                                item.size = imageStats.size;
+                                await clipboardManager.update(item);
+                            }
                         }
 
                         return; // is handled

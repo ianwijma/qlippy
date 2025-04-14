@@ -80,6 +80,9 @@ export type UrlClipboardItem = ClipboardBaseItem & ClipboardImageBase & {
     search: string;
     searchParams: Record<string, string>;
     username: string;
+    screenshotStart?: number;
+    screenshotEnd?: number;
+    size?: number;
 }
 
 export type ColourClipboardItem = ClipboardBaseItem & {
