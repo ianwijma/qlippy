@@ -95,7 +95,7 @@ export const createWindow = ({
         });
 
         // Give the devtools some time to open...
-        await sleep(500);
+        await sleep(750);
     }
     const closeDevTools = async () => {
         isInitialized();

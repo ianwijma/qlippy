@@ -1,35 +1,39 @@
 import {ClipboardItem} from "@qlippy/common/src/settings/clipboard.settings.types";
-import {memo, useMemo} from "react";
+import {Fragment, memo, useMemo} from "react";
 
 const baseKeyCombos = {
-    '': 'Shows this menu',
-    'Delete': 'Deletes the item',
-    'Backspace': 'Clear search query',
+    'Up': 'Highlight previous item',
+    'Down': 'Highlight next item',
+    'Enter': 'Restore highlighted item',
+    'Escape': 'Close Qlippy',
+    'Ctrl': 'Shows this menu',
+    'Ctrl+Delete': 'Deletes the item',
+    'Ctrl+Backspace': 'Clear search query',
 }
 
 const pinKeyCombos = {
-    'p': 'Pin the item'
+    'Ctrl+P': 'Pin the item'
 }
 
 const unpinKeyCombos = {
-    'p': 'Unpin the item'
+    'Ctrl+P': 'Unpin the item'
 }
 
 const fileKeyCombos = {
-    'f': 'Open the file externally',
+    'Ctrl+F': 'Open the file externally',
 }
 
 const imageKeyCombos = {
-    'i': 'Open the image externally',
+    'Ctrl+I': 'Open the image externally',
 }
 
 const urlKeyCombos = {
-    'u': 'Open the url in the default browser',
+    'Ctrl+U': 'Open the url in the default browser',
 }
 
 const urlImageKeyCombos = {
-    'c': 'Copy the screenshot to clipboard',
-    'i': 'Open the screenshot externally',
+    'Ctrl+C': 'Copy the screenshot to clipboard',
+    'Ctrl+I': 'Open the screenshot externally',
 }
 
 export type ClipboardMenuParams = {
@@ -86,18 +90,37 @@ export const ClipboardMenu = memo(({show, item}: ClipboardMenuParams) => {
         >
 
             <div className='bg-opacity-80 bg-white w-1/2 h-1/2 text-gray-500 pl-2 pt-3'>
-                <ul>
+                <table className='w-full'>
+                    <thead>
+                    <tr>
+                        <th className='w-1/3 text-left'>Key</th>
+                        <th className='text-left'>Description</th>
+                    </tr>
+                    </thead>
+                    <tbody>
                     {
                         Object.keys(keyCombos).map((key) => {
                             const description = keyCombos[key]
+                            const keyArray = key.split('+');
                             return (
-                                <li key={key}>
-                                    <kbd>ctrl</kbd> {key !== '' ? (<>+ <kbd>{key}</kbd></>) : ''}: {description}
-                                </li>
+                                <tr key={key}>
+                                    <td>
+                                        {keyArray.map((keyItem, index) => (
+                                            <Fragment key={keyItem}>
+                                                {!!index && ' + '}
+                                                {keyItem.toWellFormed()}
+                                            </Fragment>
+                                        ))}
+                                    </td>
+                                    <td>
+                                        {description}
+                                    </td>
+                                </tr>
                             )
                         })
                     }
-                </ul>
+                    </tbody>
+                </table>
             </div>
 
         </div>
