@@ -93,7 +93,7 @@ const createClipboardHandleChange = () => {
 
                 // Text check we're checking if it contains a valid URL.
                 const url = isTextAUrl(text.trim());
-                if (!isTextEmpty && url) {
+                if (!isTextEmpty && url && !!url.hostname) {
                     // Using the url.toString functionality to ensure a more stable URL string
                     const urlHash = sha1(url.toString());
                     if (isHashDifferent('url', urlHash)) {
