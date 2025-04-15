@@ -37,7 +37,7 @@ export const TitleBar = ({
 
     return <div className='draggable flex justify-between bg-opacity-85 bg-white text-gray-500 px-1 py-1'>
         <div className='flex items-center gap-1'>
-            <img src={defaultLogo} alt='logo' className='w-5 h-5'/>
+            <img src={defaultLogo} alt='logo' className='w-5 h-5' draggable={false}/>
             <span className='max-w-1/2 flex overflow-ellipsis overflow-hidden whitespace-nowrap'>
                 {children}
             </span>

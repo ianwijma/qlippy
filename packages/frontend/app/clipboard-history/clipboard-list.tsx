@@ -128,7 +128,7 @@ const ClipboardListItem = ({item}: ClipboardListItemParams) => {
                     <span>Image:</span>
                     {
                         imageFilePath
-                            ? <img className='h-full max-w-[75%]' src={`app://${imageFilePath}`} alt='Clipboard image content'/>
+                            ? <img className='h-full max-w-[75%]' src={`app://${imageFilePath}`} alt='Clipboard image content' draggable={false} />
                             : ''
                     }
                 </div>

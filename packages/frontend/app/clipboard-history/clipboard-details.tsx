@@ -212,6 +212,7 @@ const Details = ({ item }: DetailsProps) => {
                             src={`app://${item.imageFilePath}`}
                             alt='Clipboard url screenshot'
                             className='w-full'
+                            draggable={false}
                         />
                     </div>
                 )
@@ -244,6 +245,7 @@ const Details = ({ item }: DetailsProps) => {
                             src={`app://${item.imageFilePath}`}
                             alt='Clipboard url screenshot'
                             className='w-full'
+                            draggable="false"
                         />
                     </div>
                 )
