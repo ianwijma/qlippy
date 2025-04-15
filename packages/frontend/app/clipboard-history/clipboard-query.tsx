@@ -1,4 +1,4 @@
-import {KeyboardEventHandler, memo, useCallback, useEffect, useRef} from "react";
+import {KeyboardEventHandler, memo, useCallback, useEffect, useRef, useState} from "react";
 import { OpenClipboardHistoryAction } from '@qlippy/common/src/events/openClipboardHistory.event'
 
 export type ClipboardQueryParams = {
@@ -12,6 +12,7 @@ export type ClipboardQueryParams = {
     deleteSelected: () => void,
     openSelected: (action: OpenClipboardHistoryAction) => void,
     pinSelected: () => void,
+    restoreSelectedImage: () => void,
     close: () => void,
     isMenuShown: boolean,
     showMenu: () => void,
@@ -42,6 +43,7 @@ export const ClipboardQuery = memo(({
                                         deleteSelected,
                                         openSelected,
                                         pinSelected,
+                                        restoreSelectedImage,
                                         close,
                                         isMenuShown,
                                         showMenu,
@@ -75,7 +77,10 @@ export const ClipboardQuery = memo(({
                 case 'KeyP':
                     event.preventDefault();
                     pinSelected();
-                    hideMenu(); // useful during development, in production focus loss closes the window
+                    break;
+                case 'KeyC':
+                    event.preventDefault();
+                    restoreSelectedImage();
                     break;
             }
         } else {
@@ -99,6 +104,7 @@ export const ClipboardQuery = memo(({
             }
         }
     }, [selectNext, selectPrevious, confirmSelected, close, deleteSelected, showMenu, hideMenu, openSelected, updateQuery]);
+    const [currentTip] = useState(getRandomTip());
 
     const handleKeyUp: KeyboardEventHandler<HTMLInputElement> = useCallback((event) => {
         if (isMenuShown && !event.ctrlKey) {
@@ -157,7 +163,8 @@ export const ClipboardQuery = memo(({
                 onKeyDown={handleKeyDown}
                 onKeyUp={handleKeyUp}
                 className='not-draggable bg-opacity-70 bg-white text-gray-500 w-4/5 h-full px-2 rounded-tl-lg'
-                placeholder={getRandomTip()}
+                placeholder={currentTip}
+                suppressHydrationWarning // Because the placeholder is random, we're getting hydration warnings.
             />
             <select
                 ref={selectRef}

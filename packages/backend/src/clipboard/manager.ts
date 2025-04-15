@@ -30,6 +30,14 @@ const createClipboardManager = () => {
         return history.findIndex(({ id }) => id === item.id);
     }
 
+    const restoreImage = async (imageFilePath: string) => {
+        if (imageFilePath) {
+            const imageBuffer = await readFile(imageFilePath);
+            const image = nativeImage.createFromBuffer(imageBuffer);
+            clipboard.writeImage(image, 'clipboard');
+        }
+    }
+
     return {
         add: async (newItem: ClipboardItem): Promise<void> => {
             const settings = clipboardSettings.getSettings();
@@ -100,6 +108,7 @@ const createClipboardManager = () => {
                 history: updatedHistory,
             });
         },
+        restoreImage,
         restore: async (itemToRestore: ClipboardItem): Promise<void> => {
             const settings = clipboardSettings.getSettings();
             const {history} = settings;
@@ -126,11 +135,7 @@ const createClipboardManager = () => {
                 switch (type) {
                     case 'image': {
                         const {imageFilePath} = itemToRestore;
-                        if (imageFilePath) {
-                            const imageBuffer = await readFile(imageFilePath);
-                            const image = nativeImage.createFromBuffer(imageBuffer);
-                            clipboard.writeImage(image, 'clipboard');
-                        }
+                        await restoreImage(imageFilePath);
                         break;
                     }
                     case 'url': {

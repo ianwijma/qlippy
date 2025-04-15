@@ -82,6 +82,8 @@ export type UrlClipboardItem = ClipboardBaseItem & ClipboardImageBase & {
     username: string;
     screenshotStart?: number;
     screenshotEnd?: number;
+    screenshotWidth?: number;
+    screenshotHeight: number;
     size?: number;
 }
 

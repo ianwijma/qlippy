@@ -27,6 +27,11 @@ const urlKeyCombos = {
     'u': 'Open the url in the default browser',
 }
 
+const urlImageKeyCombos = {
+    'c': 'Copy the screenshot to clipboard',
+    'i': 'Open the screenshot externally',
+}
+
 export type ClipboardMenuParams = {
     show: boolean,
     item: ClipboardItem | undefined,
@@ -54,11 +59,15 @@ export const ClipboardMenu = memo(({show, item}: ClipboardMenuParams) => {
                 }
             }
             case 'url': {
+                const {imageFilePath} = item;
+
+                const actualUrlImageKeyCombos = !!imageFilePath ? urlImageKeyCombos : {};
+
                 return {
                     ...baseKeyCombos,
                     ...getPinKeyCombos(),
                     ...urlKeyCombos,
-                    ...imageKeyCombos,
+                    ...actualUrlImageKeyCombos
                 }
             }
             default: {

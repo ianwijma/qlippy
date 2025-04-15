@@ -129,7 +129,6 @@ export const textToUrlClipboardItem = ({text, url, hash}: ConverterType<{text: s
     return {
         type: 'url',
         url: urlString,
-        imageFilePath: undefined,
         ...getBase({ hash }),
         length: urlString.length,
         host: url.host,
@@ -143,6 +142,11 @@ export const textToUrlClipboardItem = ({text, url, hash}: ConverterType<{text: s
         search: url.search,
         searchParams: Object.fromEntries(url.searchParams.entries()),
         username: url.username,
+        imageFilePath: undefined,
+        screenshotStart: undefined,
+        screenshotEnd: undefined,
+        screenshotWidth: undefined,
+        screenshotHeight: undefined,
     }
 }
 

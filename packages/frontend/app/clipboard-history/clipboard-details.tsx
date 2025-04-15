@@ -90,6 +90,8 @@ const getMetadataFromType = (item: ClipboardItem) => {
                 "Url query": item.searchParams,
                 "Screenshot size": Number.isInteger(item.size) ? humanFileSize(item.size) : undefined,
                 "Screenshot duration": toDifference(item.screenshotStart, item.screenshotEnd),
+                'Screenshot width': Number.isInteger(item.screenshotWidth) ? String(item.screenshotWidth) : undefined,
+                'Screenshot height': Number.isInteger(item.screenshotHeight) ? String(item.screenshotHeight) : undefined,
                 ...baseData,
             };
         case 'path': {
@@ -237,11 +239,13 @@ const Details = ({ item }: DetailsProps) => {
             const {imageFilePath} = item;
             if (imageFilePath) {
                 return (
-                    <img
-                        src={`app://${item.imageFilePath}`}
-                        alt='Clipboard image'
-                        className='w-full h-full object-contain'
-                    />
+                    <div className='w-full h-full'>
+                        <img
+                            src={`app://${item.imageFilePath}`}
+                            alt='Clipboard url screenshot'
+                            className='w-full'
+                        />
+                    </div>
                 )
             }
 

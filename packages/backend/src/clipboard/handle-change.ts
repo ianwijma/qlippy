@@ -18,6 +18,8 @@ import { join as pathJoin } from 'node:path'
 import {fileExists, fileStats, UNSAFE_fileStats, writeFile} from "../utils/files";
 import {screenshotUrl} from "../utils/screenshotSite";
 import {sha1} from "../utils/crypto";
+import {nativeImage} from "electron";
+
 
 const CLIPBOARD_STORAGE_PATH = 'clipboard-files';
 
@@ -109,10 +111,23 @@ const createClipboardHandleChange = () => {
                         const filePath = pathJoin(CLIPBOARD_STORAGE_PATH, `${item.id}.png`);
                         let fileStoragePath = await fileExists(filePath);
                         if (fileStoragePath === false) {
+                            // Screenshotting the URL
                             item.screenshotStart = Date.now();
                             const screenshotPng = await screenshotUrl.screenshot({ url, type: 'png' });
-                            item.imageFilePath = await writeFile(filePath, screenshotPng);
                             item.screenshotEnd = Date.now();
+
+                            // Saving the screenshot start and end times.
+                            await clipboardManager.update(item);
+
+                            // Writing the file to disc
+                            item.imageFilePath = await writeFile(filePath, screenshotPng);
+
+                            // Extracting the screenshot information.
+                            const screenshot = nativeImage.createFromBuffer(screenshotPng);
+                            const screenshotSize = screenshot.getSize();
+                            item.screenshotWidth = screenshotSize.width;
+                            item.screenshotHeight = screenshotSize.height;
+
                             await clipboardManager.update(item);
 
                             // Get the screenshot size

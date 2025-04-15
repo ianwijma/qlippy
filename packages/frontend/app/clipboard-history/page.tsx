@@ -26,6 +26,10 @@ import {
     OpenClipboardHistoryEventData,
     openClipboardHistoryEventName
 } from '@qlippy/common/src/events/openClipboardHistory.event'
+import {
+    RestoreImageClipboardHistoryEventData,
+    restoreImageClipboardHistoryEventName
+} from '@qlippy/common/src/events/restoreImageClipboardHistory.event'
 import {useWindowControls} from "../../hooks/useWindowControls";
 import {toHumanDateAgo} from '@qlippy/common/src/date'
 import {ClipboardMenu} from "./clipboard-menu";
@@ -182,6 +186,16 @@ export default function ClipboardHistoryPage() {
         close();
     }, [selectedItem]);
 
+    const restoreSelectedImage = useCallback(() => {
+        if (selectedItem && 'imageFilePath' in selectedItem && !!selectedItem.imageFilePath) {
+            eventHandler.emit<RestoreImageClipboardHistoryEventData>(restoreImageClipboardHistoryEventName, {
+                id: selectedItem.id
+            });
+        }
+
+        setSelectedIndex(0);
+    }, [selectedItem, setSelectedIndex]);
+
     const clearSelected = useCallback(() => {
         if (selectedItem) {
             eventHandler.emit<ClearClipboardHistoryEventData>(clearClipboardHistoryEventName, {
@@ -263,6 +277,7 @@ export default function ClipboardHistoryPage() {
                         deleteSelected={clearSelected}
                         openSelected={openSelected}
                         pinSelected={pinSelected}
+                        restoreSelectedImage={restoreSelectedImage}
                         close={handleClose}
                         isMenuShown={showMenu}
                         showMenu={handleShowMenu}
