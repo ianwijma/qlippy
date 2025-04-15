@@ -1,24 +1,21 @@
 import 'zx/globals'
+import {readBackendPackageJsonKey, writeBackendPackageJson} from "./utils.mjs";
 
 const {quick} = argv;
 
 const {stdout} = await $`git rev-parse HEAD`;
 const commitHash = stdout.trim();
 
-const backendPackage = await fs.readJSON('packages/backend/package.json');
-const currentVersion = backendPackage.version;
+const currentVersion = await readBackendPackageJsonKey('version');
 
-backendPackage.version = `${currentVersion}.${commitHash}`;
+await writeBackendPackageJson('version', `${currentVersion}.${commitHash}`);
 
-fs.writeJson('packages/backend/package.json', backendPackage, {spaces: 2});
-
-const restore = () => {
-    backendPackage.version = currentVersion;
-    fs.writeJson('packages/backend/package.json', backendPackage, {spaces: 2});
+const restore = async () => {
+    await writeBackendPackageJson('version', currentVersion);
 }
 
-process.on("SIGINT", () => {
-    restore();
+process.on("SIGINT", async () => {
+    await restore();
 });
 
 try {
@@ -56,5 +53,5 @@ try {
 } catch {
     // Don't really care
 } finally {
-    restore()
+    await restore()
 }
