@@ -81,24 +81,24 @@ export default function ClipboardHistoryPage() {
             switch (type) {
                 case 'text': return {
                     ...base,
-                    text: item.text.toString(),
+                    text: item.text?.toString(),
                 };
                 case 'colour': return {
                     ...base,
-                    text: item.colour.toLowerCase(),
+                    text: item.colour?.toLowerCase(),
                 }
                 case 'html': return {
                     ...base,
-                    text: item.htmlText.toLowerCase(),
+                    text: item.htmlText?.toLowerCase(),
                 }
                 case 'url': return {
                     ...base,
-                    text: item.url.toLowerCase(),
+                    text: item.url?.toLowerCase(),
                 }
                 case 'path': {
                     return {
                         ...base,
-                        text: item.path.toLowerCase(),
+                        text: item.path?.toLowerCase(),
                     }
                 }
                 case 'image': return {
